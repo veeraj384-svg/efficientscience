@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EfficientScience — Premium IAC Practice Platform</title>
+  <meta name="description" content="Master science competition problems with adaptive practice, expert explanations, and real-time progress tracking." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Subject card accent colors */
+    .sc-physics    { --card-grad: linear-gradient(90deg,#3b82f6,#06b6d4); }
+    .sc-chemistry  { --card-grad: linear-gradient(90deg,#a855f7,#ec4899); }
+    .sc-biology    { --card-grad: linear-gradient(90deg,#22c55e,#84cc16); }
+    .sc-earth      { --card-grad: linear-gradient(90deg,#f59e0b,#ef4444); }
+    .sc-astronomy  { --card-grad: linear-gradient(90deg,#2dd4bf,#3b82f6); }
+    .sc-env        { --card-grad: linear-gradient(90deg,#4ade80,#2dd4bf); }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<canvas id="star-canvas"></canvas>
+
+<!-- ── Navigation ─────────────────────────────────────── -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">⚗️</div>
+      <span>EfficientScience</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#subjects">Subjects</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#preview">Practice</a></li>
+      <li><a href="#leaderboard">Rankings</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="practice.html" class="btn btn-ghost btn-sm">Sign In</a>
+      <a href="practice.html" class="btn btn-primary btn-sm">Start Practicing</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="badge">IAC Competition Prep · 2025</span>
+      </div>
+      <h1>
+        Compete at the<br>
+        <span class="grad-text">Top of Science</span>
+      </h1>
+      <p>
+        Master Physics, Chemistry, Biology, Astronomy and more with
+        expert-crafted problems, instant explanations, and intelligent
+        progress tracking designed for competition winners.
+      </p>
+      <div class="hero-cta">
+        <a href="practice.html" class="btn btn-primary btn-lg">
+          Start Free Practice →
+        </a>
+        <a href="#subjects" class="btn btn-ghost btn-lg">
+          Explore Subjects
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num" data-target="1200" data-suffix="+">0+</div>
+          <div class="stat-label">Practice Problems</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="6" data-suffix="">0</div>
+          <div class="stat-label">Science Subjects</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="8400" data-suffix="+">0+</div>
+          <div class="stat-label">Students Practicing</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="94" data-suffix="%">0%</div>
+          <div class="stat-label">Score Improvement Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ───────────────────────────────────────── -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">Why EfficientScience</span>
+      <h2 style="margin-top:20px">Everything you need to<br><span class="grad-text">win competitions</span></h2>
+      <p>Built by science olympiad medalists for the next generation of champions.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">🎯</div>
+        <h3>Adaptive Question Bank</h3>
+        <p>Our system surfaces problems tailored to your weak areas across 6 subjects, 4 difficulty levels, and dozens of topics.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Expert Explanations</h3>
+        <p>Every question comes with a detailed, step-by-step solution written by PhD scientists and competition coaches.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">📊</div>
+        <h3>Real-Time Progress Tracking</h3>
+        <p>Track accuracy, streaks, and scores per subject. Identify patterns in your performance and optimize your study time.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">⏱</div>
+        <h3>Timed Practice Mode</h3>
+        <p>Simulate real competition pressure with per-question timers. Build the speed and confidence you need on exam day.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">🏆</div>
+        <h3>Competition-Level Content</h3>
+        <p>Problems sourced from IPhO, IChO, IBO, IAO, and national olympiad archives — the most challenging content available.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">🌐</div>
+        <h3>Cross-Platform Access</h3>
+        <p>Practice on any device, any time. Your progress syncs automatically so you never lose a streak.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Subjects ────────────────────────────────────────── -->
+<section class="section subjects" id="subjects">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">Six Core Disciplines</span>
+      <h2 style="margin-top:20px">Choose your<br><span class="grad-text">battleground</span></h2>
+      <p>Deep content libraries across every major science competition subject.</p>
+    </div>
+    <div class="subjects-grid">
+
+      <a href="practice.html?subject=Physics" class="subject-card sc-physics reveal reveal-delay-1">
+        <span class="icon">⚛️</span>
+        <h3>Physics</h3>
+        <p class="desc">Mechanics, electromagnetism, thermodynamics, waves, optics, modern physics, and relativity.</p>
+        <div class="subject-meta">
+          <span class="pill">320 Problems</span>
+          <span>·</span>
+          <span>IPhO Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+      <a href="practice.html?subject=Chemistry" class="subject-card sc-chemistry reveal reveal-delay-2">
+        <span class="icon">🧪</span>
+        <h3>Chemistry</h3>
+        <p class="desc">Stoichiometry, thermodynamics, equilibrium, kinetics, electrochemistry, and organic mechanisms.</p>
+        <div class="subject-meta">
+          <span class="pill">290 Problems</span>
+          <span>·</span>
+          <span>IChO Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+      <a href="practice.html?subject=Biology" class="subject-card sc-biology reveal reveal-delay-3">
+        <span class="icon">🧬</span>
+        <h3>Biology</h3>
+        <p class="desc">Cell biology, genetics, ecology, physiology, molecular biology, and evolutionary theory.</p>
+        <div class="subject-meta">
+          <span class="pill">260 Problems</span>
+          <span>·</span>
+          <span>IBO Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+      <a href="practice.html?subject=Astronomy" class="subject-card sc-astronomy reveal reveal-delay-1">
+        <span class="icon">🔭</span>
+        <h3>Astronomy</h3>
+        <p class="desc">Stellar physics, orbital mechanics, cosmology, galactic structure, and observational techniques.</p>
+        <div class="subject-meta">
+          <span class="pill">180 Problems</span>
+          <span>·</span>
+          <span>IAO Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+      <a href="practice.html?subject=Earth Science" class="subject-card sc-earth reveal reveal-delay-2">
+        <span class="icon">🌍</span>
+        <h3>Earth Science</h3>
+        <p class="desc">Plate tectonics, seismology, atmospheric science, oceanography, and geologic cycles.</p>
+        <div class="subject-meta">
+          <span class="pill">140 Problems</span>
+          <span>·</span>
+          <span>IESO Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+      <a href="practice.html?subject=Environmental" class="subject-card sc-env reveal reveal-delay-3">
+        <span class="icon">🌿</span>
+        <h3>Environmental Science</h3>
+        <p class="desc">Climate systems, biogeochemical cycles, biodiversity, pollution, and sustainability science.</p>
+        <div class="subject-meta">
+          <span class="pill">130 Problems</span>
+          <span>·</span>
+          <span>Advanced Level</span>
+        </div>
+        <div class="subject-arrow">→</div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Practice Preview ────────────────────────────────── -->
+<section class="section preview-section" id="preview">
+  <div class="container">
+    <div class="preview-inner">
+      <div class="preview-text reveal">
+        <span class="badge">Live Demo</span>
+        <h2 style="margin-top:20px">Experience the<br><span class="grad-text">Practice Engine</span></h2>
+        <p>Answer real competition-level questions, get instant feedback, and learn from detailed explanations. Try it right now — no signup required.</p>
+        <ul class="preview-points">
+          <li>Immediate answer validation with color feedback</li>
+          <li>Step-by-step expert explanations on every question</li>
+          <li>Difficulty tags so you know what you're tackling</li>
+          <li>Progress bar and per-session scoring</li>
+        </ul>
+        <a href="practice.html" class="btn btn-primary btn-lg">Launch Full Practice →</a>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <!-- Interactive demo card -->
+        <div class="question-mock">
+          <div class="qm-header">
+            <span class="qm-tag">Physics · Quantum</span>
+            <span class="qm-diff">⚡ Olympiad</span>
+          </div>
+          <p class="qm-q">
+            An electron in a hydrogen atom transitions from n = 4 to n = 2. Using
+            E<sub>n</sub> = −13.6 / n² eV, what is the energy of the emitted photon?
+          </p>
+          <div class="qm-options">
+            <div class="qm-opt" tabindex="0">
+              <span class="opt-letter">A</span>1.89 eV
+            </div>
+            <div class="qm-opt" tabindex="0">
+              <span class="opt-letter">B</span>2.55 eV
+            </div>
+            <div class="qm-opt" tabindex="0">
+              <span class="opt-letter">C</span>0.85 eV
+            </div>
+            <div class="qm-opt" tabindex="0">
+              <span class="opt-letter">D</span>3.40 eV
+            </div>
+          </div>
+          <div class="qm-explanation">
+            💡 ΔE = E₄ − E₂ = −13.6/16 − (−13.6/4) = −0.85 + 3.40 = <strong>2.55 eV</strong>.
+            This photon corresponds to the Hα Balmer series line (486 nm, blue-green).
+          </div>
+          <div class="qm-footer">
+            <div class="qm-progress">
+              3 / 10
+              <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Leaderboard ─────────────────────────────────────── -->
+<section class="section leaderboard-section" id="leaderboard">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge">Community</span>
+      <h2 style="margin-top:20px">Top <span class="grad-text">Performers</span></h2>
+      <p>See how you stack up against fellow competitors globally.</p>
+    </div>
+    <div class="leaderboard-wrap">
+      <div class="lb-card reveal">
+        <div class="lb-header">
+          <h3>Global Rankings · This Week</h3>
+          <a href="practice.html" class="view-all">View all →</a>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank gold">🥇</span>
+          <span class="lb-avatar">👩‍🔬</span>
+          <div><div class="lb-name">Anika S.</div><div class="lb-sub">Physics · Astronomy</div></div>
+          <span class="lb-score">4,820 pts</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank silver">🥈</span>
+          <span class="lb-avatar">👨‍🔬</span>
+          <div><div class="lb-name">Raj M.</div><div class="lb-sub">Chemistry · Biology</div></div>
+          <span class="lb-score">4,510 pts</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank bronze">🥉</span>
+          <span class="lb-avatar">🧑‍🔬</span>
+          <div><div class="lb-name">Lena K.</div><div class="lb-sub">Biology · Earth Science</div></div>
+          <span class="lb-score">4,280 pts</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">4</span>
+          <span class="lb-avatar">👩‍💻</span>
+          <div><div class="lb-name">Darius P.</div><div class="lb-sub">Physics · Environmental</div></div>
+          <span class="lb-score">3,990 pts</span>
+        </div>
+        <div class="lb-row">
+          <span class="lb-rank">5</span>
+          <span class="lb-avatar">🧑‍🎓</span>
+          <div><div class="lb-name">Mei W.</div><div class="lb-sub">Astronomy · Chemistry</div></div>
+          <span class="lb-score">3,750 pts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ─────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <h2>Ready to reach<br><span class="grad-text">olympiad level?</span></h2>
+      <p>Join thousands of students already sharpening their edge with EfficientScience.</p>
+      <div class="cta-buttons">
+        <a href="practice.html" class="btn btn-primary btn-lg">Start Practicing Free →</a>
+        <a href="#subjects" class="btn btn-outline btn-lg">Browse Subjects</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <div class="logo-icon">⚗️</div>
+          <span>EfficientScience</span>
+        </div>
+        <p>The premium science competition practice platform. Train smarter. Score higher. Win.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Subjects</h4>
+        <ul>
+          <li><a href="practice.html?subject=Physics">Physics</a></li>
+          <li><a href="practice.html?subject=Chemistry">Chemistry</a></li>
+          <li><a href="practice.html?subject=Biology">Biology</a></li>
+          <li><a href="practice.html?subject=Astronomy">Astronomy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Practice</h4>
+        <ul>
+          <li><a href="practice.html">All Problems</a></li>
+          <li><a href="practice.html?diff=Olympiad">Olympiad Level</a></li>
+          <li><a href="practice.html?diff=Hard">Hard Problems</a></li>
+          <li><a href="practice.html?diff=Easy">Beginner Mode</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 EfficientScience. All rights reserved.</span>
+      <span>Built for science olympiad competitors worldwide 🌍</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/problems.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

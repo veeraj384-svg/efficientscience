@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practice Arena — EfficientScience</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: var(--bg); }
+    /* Inline SVG gradient for score ring */
+    .score-ring svg { overflow: visible; }
+  </style>
+</head>
+<body>
+
+<canvas id="star-canvas"></canvas>
+
+<!-- ── Navigation ─────────────────────────────────────── -->
+<nav class="nav scrolled">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">⚗️</div>
+      <span>EfficientScience</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#subjects">Subjects</a></li>
+      <li><a href="practice.html" class="active">Practice</a></li>
+      <li><a href="index.html#leaderboard">Rankings</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Home</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Practice Layout ────────────────────────────────── -->
+<div class="practice-page">
+
+  <!-- Sidebar -->
+  <aside class="practice-sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Subject</div>
+      <div class="filter-pills">
+        <button class="filter-pill active" data-subject="all">All</button>
+        <button class="filter-pill" data-subject="Physics">Physics</button>
+        <button class="filter-pill" data-subject="Chemistry">Chemistry</button>
+        <button class="filter-pill" data-subject="Biology">Biology</button>
+        <button class="filter-pill" data-subject="Astronomy">Astronomy</button>
+        <button class="filter-pill" data-subject="Earth Science">Earth Sci.</button>
+        <button class="filter-pill" data-subject="Environmental">Environment</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Difficulty</div>
+      <div class="diff-pills">
+        <button class="diff-pill active" data-diff="all">
+          <span>All Levels</span>
+          <span class="diff-dot" style="background:#94a3b8"></span>
+        </button>
+        <button class="diff-pill" data-diff="Easy">
+          <span>Easy</span>
+          <span class="diff-dot" style="background:#22c55e"></span>
+        </button>
+        <button class="diff-pill" data-diff="Medium">
+          <span>Medium</span>
+          <span class="diff-dot" style="background:#f59e0b"></span>
+        </button>
+        <button class="diff-pill" data-diff="Hard">
+          <span>Hard</span>
+          <span class="diff-dot" style="background:#f43f5e"></span>
+        </button>
+        <button class="diff-pill" data-diff="Olympiad">
+          <span>Olympiad</span>
+          <span class="diff-dot" style="background:#a855f7"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Your Stats</div>
+      <div class="sidebar-stats">
+        <div class="sidebar-stat">
+          <span class="ss-label">Total Answered</span>
+          <span class="ss-val" id="ss-total">—</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="ss-label">Correct</span>
+          <span class="ss-val" id="ss-correct" style="color:var(--green)">—</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="ss-label">Accuracy</span>
+          <span class="ss-val" id="ss-acc">—</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="ss-label">Current Streak</span>
+          <span class="ss-val" id="ss-streak">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Difficulty Guide</div>
+      <div style="font-size:12px;color:var(--text-2);line-height:1.8;">
+        <div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · High school core</div>
+        <div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · AP / A-level</div>
+        <div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts · National olympiad</div>
+        <div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts · IPhO/IChO/IBO</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main content -->
+  <main class="practice-main">
+    <div class="practice-header">
+      <div>
+        <h1>Practice Arena</h1>
+        <p>Answer questions, earn points, and track your growth.</p>
+      </div>
+      <div id="timer-display" class="timer-display">⏱ 1:30</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="quiz-progress-bar-wrap">
+      <div class="quiz-progress-bar" id="quiz-progress-bar" style="width:0%"></div>
+    </div>
+    <div id="quiz-progress-text" style="font-size:12px;color:var(--text-3);margin-bottom:28px;">Question 1 of 10</div>
+
+    <!-- Empty state -->
+    <div id="quiz-empty" style="display:none;text-align:center;padding:80px 20px;">
+      <div style="font-size:48px;margin-bottom:20px;">🔬</div>
+      <h3 style="margin-bottom:10px;">No questions match your filters</h3>
+      <p style="color:var(--text-2);margin-bottom:24px;">Try selecting a different subject or difficulty level.</p>
+      <button class="btn btn-primary" onclick="document.querySelector('[data-subject=all]').click()">Reset Filters</button>
+    </div>
+
+    <!-- Question Card -->
+    <div id="quiz-card" class="quiz-card" style="display:none;">
+      <div class="quiz-meta">
+        <span id="quiz-subject-tag" class="tag">Physics</span>
+        <span id="quiz-diff-tag" class="tag">Easy</span>
+        <span id="quiz-num" class="quiz-num">#1 · Mechanics</span>
+      </div>
+
+      <div id="quiz-question" class="quiz-question">Loading...</div>
+
+      <div id="quiz-options" class="quiz-options"></div>
+
+      <div id="quiz-explanation" class="explanation-box">
+        <div class="exp-label">💡 Explanation</div>
+        <p id="quiz-exp-text"></p>
+      </div>
+
+      <div class="quiz-footer">
+        <span></span>
+        <button id="btn-next" class="btn btn-primary" style="display:none">Next Question →</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Score Summary Modal ──────────────────────────────── -->
+<div id="score-modal" class="modal-overlay">
+  <div class="modal-box">
+    <span class="modal-emoji" id="modal-emoji">🏆</span>
+    <h2>Round Complete!</h2>
+    <p>Here's how you performed this session.</p>
+
+    <div class="score-ring">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#3b82f6"/>
+            <stop offset="100%" style="stop-color:#a855f7"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+        <circle class="ring-val" id="score-ring-val" cx="60" cy="60" r="52"
+                stroke-dasharray="327" stroke-dashoffset="327"/>
+      </svg>
+      <div class="score-text grad-text" id="modal-score-text">0%</div>
+    </div>
+
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="val" style="color:var(--green)" id="modal-correct">0</div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="modal-stat">
+        <div class="val" style="color:var(--rose)" id="modal-incorrect">0</div>
+        <div class="lbl">Incorrect</div>
+      </div>
+      <div class="modal-stat">
+        <div class="val grad-text" id="modal-score-pts">0</div>
+        <div class="lbl">Points</div>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn btn-primary" id="btn-restart">Try Again 🔄</button>
+      <button class="btn btn-ghost" id="btn-home">Home</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/problems.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Apply URL params for subject/difficulty filters on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const sub  = params.get('subject');
+    const diff = params.get('diff');
+    if (sub) {
+      const pill = document.querySelector(`[data-subject="${sub}"]`);
+      if (pill) pill.click();
+    }
+    if (diff) {
+      const pill = document.querySelector(`[data-diff="${diff}"]`);
+      if (pill) pill.click();
+    }
+  });
+</script>
+</body>
+</html>
