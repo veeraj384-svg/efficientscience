@@ -306,6 +306,58 @@ const PracticeEngine = (() => {
   function applyFilters() {
     buildQueue();
     render();
+    updateFilterAvailability();
+  }
+
+  function countFor(g, s, d) {
+    return PROBLEMS.filter(p =>
+      (g === 'all' || p.grade      === g) &&
+      (s === 'all' || p.subject    === s) &&
+      (d === 'all' || p.difficulty === d)
+    ).length;
+  }
+
+  function updateFilterAvailability() {
+    function applyState(pill, count, isAll) {
+      const disabled = count === 0 && !isAll;
+      pill.disabled = disabled;
+      pill.classList.toggle('pill-disabled', disabled);
+      // insert or update count badge
+      let badge = pill.querySelector('.pill-count');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'pill-count';
+        pill.appendChild(badge);
+      }
+      badge.textContent = count;
+    }
+
+    document.querySelectorAll('.grade-pill[data-grade]').forEach(pill => {
+      const g = pill.dataset.grade;
+      applyState(pill, countFor(g, currentSubject, currentDiff), g === 'all');
+    });
+
+    document.querySelectorAll('.filter-pill[data-subject]').forEach(pill => {
+      const s = pill.dataset.subject;
+      applyState(pill, countFor(currentGrade, s, currentDiff), s === 'all');
+    });
+
+    document.querySelectorAll('.diff-pill[data-diff]').forEach(pill => {
+      const d = pill.dataset.diff;
+      const count = countFor(currentGrade, currentSubject, d);
+      applyState(pill, count, d === 'all');
+      // update the inline count after the label text (before the dot)
+      const span = pill.querySelector('span:first-child');
+      if (span) {
+        // remove old inline count node if present
+        const old = pill.querySelector('.pill-count-inline');
+        if (old) old.remove();
+        const ic = document.createElement('span');
+        ic.className = 'pill-count-inline';
+        ic.textContent = count;
+        pill.insertBefore(ic, pill.querySelector('.diff-dot'));
+      }
+    });
   }
 
   function updateDiffGuide() {
@@ -392,6 +444,7 @@ const PracticeEngine = (() => {
     render();
     updateSidebarStats();
     updateDiffGuide();
+    updateFilterAvailability();
   }
 
   return { init };

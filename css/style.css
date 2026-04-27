@@ -537,6 +537,7 @@ section { position: relative; z-index: 1; }
 }
 .filter-pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .filter-pill {
+  display: inline-flex; align-items: center;
   padding: 6px 12px; border-radius: 99px;
   border: 1px solid var(--border);
   background: transparent;
@@ -546,6 +547,7 @@ section { position: relative; z-index: 1; }
 }
 .filter-pill:hover { border-color: var(--blue); color: var(--blue-light); }
 .filter-pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.filter-pill.active .pill-count { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
 
 .diff-pills { display: flex; flex-direction: column; gap: 6px; }
 .diff-pill {
@@ -729,6 +731,44 @@ section { position: relative; z-index: 1; }
 .grade-pill.grade-mid:hover    { border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.05); }
 .grade-pill.grade-hs.active    { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.08); }
 .grade-pill.grade-hs:hover     { border-color: rgba(168,85,247,0.3); background: rgba(168,85,247,0.05); }
+
+/* ── Disabled pill state ─────────────────────────────────── */
+.filter-pill.pill-disabled,
+.diff-pill.pill-disabled,
+.grade-pill.pill-disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Count badges on pills ───────────────────────────────── */
+.pill-count {
+  font-size: 10px; font-weight: 700;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  padding: 1px 6px;
+  color: var(--text-3);
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.filter-pill .pill-count { margin-left: auto; }
+
+/* count on diff pills sits between label and colored dot */
+.pill-count-inline {
+  font-size: 10px; font-weight: 700;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  padding: 1px 6px;
+  color: var(--text-3);
+  margin: 0 6px 0 auto;
+  flex-shrink: 0;
+}
+
+/* count on grade pills */
+.grade-pill .pill-count {
+  margin-left: auto;
+  font-size: 11px;
+}
 
 /* ── Grade Level Cards (landing page) ────────────────────── */
 .levels-grid {
