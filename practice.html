@@ -39,6 +39,29 @@
   <!-- Sidebar -->
   <aside class="practice-sidebar">
 
+    <!-- Grade Level Selector — big, prominent -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Grade Level</div>
+      <div class="grade-pills">
+        <button class="grade-pill active" data-grade="all">
+          <span class="gp-icon">🌐</span>
+          <span class="gp-label">All Levels</span>
+        </button>
+        <button class="grade-pill grade-elem" data-grade="Elementary">
+          <span class="gp-icon">🌱</span>
+          <span class="gp-label">Elementary <small>Grades 3–5</small></span>
+        </button>
+        <button class="grade-pill grade-mid" data-grade="Middle">
+          <span class="gp-icon">🔬</span>
+          <span class="gp-label">Middle School <small>Grades 6–8</small></span>
+        </button>
+        <button class="grade-pill grade-hs" data-grade="High School">
+          <span class="gp-icon">🏆</span>
+          <span class="gp-label">High School <small>Competition</small></span>
+        </button>
+      </div>
+    </div>
+
     <div class="sidebar-section">
       <div class="sidebar-label">Subject</div>
       <div class="filter-pills">
@@ -102,11 +125,11 @@
 
     <div class="sidebar-section">
       <div class="sidebar-label">Difficulty Guide</div>
-      <div style="font-size:12px;color:var(--text-2);line-height:1.8;">
-        <div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · High school core</div>
-        <div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · AP / A-level</div>
-        <div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts · National olympiad</div>
-        <div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts · IPhO/IChO/IBO</div>
+      <div id="diff-guide" style="font-size:12px;color:var(--text-2);line-height:1.8;">
+        <div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts</div>
+        <div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts</div>
+        <div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts</div>
+        <div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts</div>
       </div>
     </div>
 
@@ -208,21 +231,5 @@
 
 <script src="js/problems.js"></script>
 <script src="js/app.js"></script>
-<script>
-  // Apply URL params for subject/difficulty filters on load
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const sub  = params.get('subject');
-    const diff = params.get('diff');
-    if (sub) {
-      const pill = document.querySelector(`[data-subject="${sub}"]`);
-      if (pill) pill.click();
-    }
-    if (diff) {
-      const pill = document.querySelector(`[data-diff="${diff}"]`);
-      if (pill) pill.click();
-    }
-  });
-</script>
 </body>
 </html>

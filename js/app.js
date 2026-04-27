@@ -115,6 +115,7 @@ function initMobileNav() {
 const PracticeEngine = (() => {
   let currentSubject = 'all';
   let currentDiff    = 'all';
+  let currentGrade   = 'all';
   let queue          = [];
   let idx            = 0;
   let answered       = false;
@@ -135,7 +136,8 @@ const PracticeEngine = (() => {
   function getFiltered() {
     return PROBLEMS.filter(p =>
       (currentSubject === 'all' || p.subject === currentSubject) &&
-      (currentDiff    === 'all' || p.difficulty === currentDiff)
+      (currentDiff    === 'all' || p.difficulty === currentDiff) &&
+      (currentGrade   === 'all' || p.grade === currentGrade)
     );
   }
 
@@ -306,8 +308,35 @@ const PracticeEngine = (() => {
     render();
   }
 
+  function updateDiffGuide() {
+    const guide = document.getElementById('diff-guide');
+    if (!guide) return;
+    const emap = {
+      'Elementary':   '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · Grades 3–5 level</div>',
+      'Middle':       '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · Foundational</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · Applied concepts</div>',
+      'High School':  '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · High school core</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · AP / A-level</div><div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts · National olympiad</div><div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts · IPhO/IChO/IBO</div>',
+      'all':          '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts</div><div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts</div><div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts</div>'
+    };
+    guide.innerHTML = emap[currentGrade] || emap['all'];
+  }
+
   function init() {
     if (!document.getElementById('quiz-card')) return;
+
+    // Grade level filters
+    document.querySelectorAll('.grade-pill[data-grade]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.grade-pill[data-grade]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentGrade = pill.dataset.grade;
+        // Reset difficulty when switching grades to avoid empty results
+        currentDiff = 'all';
+        document.querySelectorAll('.diff-pill[data-diff]').forEach(p => p.classList.remove('active'));
+        document.querySelector('.diff-pill[data-diff="all"]').classList.add('active');
+        applyFilters();
+        updateDiffGuide();
+      });
+    });
 
     // Subject filters
     document.querySelectorAll('.filter-pill[data-subject]').forEach(pill => {
@@ -341,9 +370,28 @@ const PracticeEngine = (() => {
       window.location.href = 'index.html';
     });
 
+    // Apply URL params
+    const params = new URLSearchParams(window.location.search);
+    const gParam = params.get('grade');
+    const sParam = params.get('subject');
+    const dParam = params.get('diff');
+    if (gParam) {
+      const gpill = document.querySelector(`.grade-pill[data-grade="${gParam}"]`);
+      if (gpill) { document.querySelector('.grade-pill[data-grade="all"]').classList.remove('active'); gpill.classList.add('active'); currentGrade = gParam; updateDiffGuide(); }
+    }
+    if (sParam) {
+      const spill = document.querySelector(`.filter-pill[data-subject="${sParam}"]`);
+      if (spill) { document.querySelector('.filter-pill[data-subject="all"]').classList.remove('active'); spill.classList.add('active'); currentSubject = sParam; }
+    }
+    if (dParam) {
+      const dpill = document.querySelector(`.diff-pill[data-diff="${dParam}"]`);
+      if (dpill) { document.querySelector('.diff-pill[data-diff="all"]').classList.remove('active'); dpill.classList.add('active'); currentDiff = dParam; }
+    }
+
     buildQueue();
     render();
     updateSidebarStats();
+    updateDiffGuide();
   }
 
   return { init };

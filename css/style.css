@@ -706,6 +706,90 @@ section { position: relative; z-index: 1; }
 .modal-stat .lbl { font-size: 11px; color: var(--text-2); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 .modal-buttons { display: flex; gap: 12px; justify-content: center; }
 
+/* ── Grade Level Pills ───────────────────────────────────── */
+.grade-pills { display: flex; flex-direction: column; gap: 8px; }
+.grade-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent; cursor: pointer;
+  transition: var(--transition); text-align: left; width: 100%;
+  color: var(--text-2);
+}
+.grade-pill:hover { border-color: var(--border-2); color: var(--text); background: var(--surface); }
+.grade-pill.active { color: var(--text); background: var(--surface-2); border-color: var(--border-2); }
+.gp-icon { font-size: 18px; flex-shrink: 0; }
+.gp-label { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.gp-label small { display: block; font-size: 11px; font-weight: 400; color: var(--text-3); margin-top: 1px; }
+
+/* Active tints per grade */
+.grade-pill.grade-elem.active  { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.08); }
+.grade-pill.grade-elem:hover   { border-color: rgba(34,197,94,0.3);  background: rgba(34,197,94,0.05); }
+.grade-pill.grade-mid.active   { border-color: rgba(45,212,191,0.4); background: rgba(45,212,191,0.08); }
+.grade-pill.grade-mid:hover    { border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.05); }
+.grade-pill.grade-hs.active    { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.08); }
+.grade-pill.grade-hs:hover     { border-color: rgba(168,85,247,0.3); background: rgba(168,85,247,0.05); }
+
+/* ── Grade Level Cards (landing page) ────────────────────── */
+.levels-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 768px) { .levels-grid { grid-template-columns: 1fr; } }
+
+.level-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  padding: 40px 32px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none; display: block;
+  transition: var(--transition);
+  overflow: hidden;
+}
+.level-card::before {
+  content: ''; position: absolute; inset: 0;
+  opacity: 0; transition: var(--transition);
+}
+.level-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-card); }
+.level-card:hover::before { opacity: 1; }
+
+.level-card.elem::before  { background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, transparent 60%); }
+.level-card.mid::before   { background: linear-gradient(135deg, rgba(45,212,191,0.08) 0%, transparent 60%); }
+.level-card.hs::before    { background: linear-gradient(135deg, rgba(168,85,247,0.08) 0%, transparent 60%); }
+.level-card.elem:hover  { border-color: rgba(34,197,94,0.3); }
+.level-card.mid:hover   { border-color: rgba(45,212,191,0.3); }
+.level-card.hs:hover    { border-color: rgba(168,85,247,0.3); }
+
+.level-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 99px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+.elem .level-badge { background: rgba(34,197,94,0.12);  color: #4ade80;  border: 1px solid rgba(34,197,94,0.2); }
+.mid  .level-badge { background: rgba(45,212,191,0.12); color: #5eead4;  border: 1px solid rgba(45,212,191,0.2); }
+.hs   .level-badge { background: rgba(168,85,247,0.12); color: #c084fc;  border: 1px solid rgba(168,85,247,0.2); }
+
+.level-icon { font-size: 48px; display: block; margin-bottom: 18px; }
+.level-card h3 { font-size: 22px; margin-bottom: 6px; }
+.level-card .grades { font-size: 13px; color: var(--text-3); margin-bottom: 14px; font-weight: 500; }
+.level-card p { font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 24px; }
+.level-topics { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.level-topics span {
+  padding: 3px 10px; border-radius: 99px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 11px; color: var(--text-2); font-weight: 500;
+}
+.level-cta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700;
+}
+.elem .level-cta { color: #4ade80; }
+.mid  .level-cta { color: #5eead4; }
+.hs   .level-cta { color: #c084fc; }
+
 /* ── Stats Grid (practice sidebar) ──────────────────────── */
 .sidebar-stats {
   background: var(--surface);
