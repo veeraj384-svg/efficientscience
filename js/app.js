@@ -292,6 +292,38 @@ const PracticeEngine = (() => {
 
     document.getElementById('score-modal').classList.add('show');
     document.getElementById('quiz-progress-bar').style.width = '100%';
+
+    // Save score to server
+    const saveEl = document.getElementById('modal-save-status');
+    if (!saveEl) return;
+    saveEl.style.display = 'block';
+
+    if (typeof Auth !== 'undefined' && Auth.isLoggedIn) {
+      saveEl.className = 'modal-save-status saving';
+      saveEl.textContent = '⏳ Saving to leaderboard…';
+      Auth.submitScore({
+        subject:    currentSubject,
+        grade:      currentGrade,
+        difficulty: currentDiff,
+        score, correct, total, pct
+      }).then(res => {
+        if (res && res.ok) {
+          saveEl.className = 'modal-save-status saved';
+          saveEl.textContent = '✅ Score saved to leaderboard!';
+        } else {
+          saveEl.className = 'modal-save-status unsaved';
+          saveEl.textContent = '⚠️ Could not save score.';
+        }
+      });
+    } else {
+      saveEl.className = 'modal-save-status unsaved';
+      saveEl.innerHTML = '🔒 <a id="modal-signin-link">Sign in</a> to save your score to the leaderboard.';
+      document.getElementById('modal-signin-link')
+        ?.addEventListener('click', () => {
+          document.getElementById('score-modal').classList.remove('show');
+          if (typeof AuthModal !== 'undefined') AuthModal.open('signin');
+        });
+    }
   }
 
   function updateSidebarStats() {
