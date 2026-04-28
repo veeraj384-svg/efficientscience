@@ -11,7 +11,6 @@ const SECRET = process.env.JWT_SECRET || 'effscience-dev-secret';
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..')));
 
 // ── Database ────────────────────────────────────────────────
 const db = new Database(path.join(__dirname, 'database.db'));
@@ -179,6 +178,9 @@ app.get('/api/leaderboard/me', auth, (req, res) => {
   `).get(req.user.id);
   res.json(rank || { rnk: null, pts: 0 });
 });
+
+// ── Static files (after API routes so express.static never intercepts POSTs) ──
+app.use(express.static(path.join(__dirname, '..')));
 
 // ── Start ───────────────────────────────────────────────────
 app.listen(PORT, () =>
