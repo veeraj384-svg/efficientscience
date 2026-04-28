@@ -1020,3 +1020,21 @@ section { position: relative; z-index: 1; }
 .modal-save-status.unsaved { background: var(--surface); color: var(--text-2); }
 .modal-save-status.unsaved a { color: var(--blue-light); cursor: pointer; font-weight: 600; }
 
+/* Server offline banner */
+#server-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: rgba(244,63,94,0.15);
+  border-bottom: 1px solid rgba(244,63,94,0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-1);
+  font-size: 13px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+

@@ -299,14 +299,25 @@ const PracticeEngine = (() => {
     saveEl.style.display = 'block';
 
     if (typeof Auth !== 'undefined' && Auth.isLoggedIn) {
+      saveEl.className = 'modal-save-status saving';
+      saveEl.textContent = '⏳ Saving score…';
       Auth.submitScore({
         subject:    currentSubject,
         grade:      currentGrade,
         difficulty: currentDiff,
         score, correct, total, pct
+      }).then(d => {
+        if (d && d.error) {
+          saveEl.className = 'modal-save-status unsaved';
+          saveEl.textContent = '⚠️ Could not save score: ' + d.error;
+        } else {
+          saveEl.className = 'modal-save-status saved';
+          saveEl.textContent = '✅ Score saved to leaderboard!';
+        }
+      }).catch(() => {
+        saveEl.className = 'modal-save-status unsaved';
+        saveEl.textContent = '⚠️ Could not reach server to save score.';
       });
-      saveEl.className = 'modal-save-status saved';
-      saveEl.textContent = '✅ Score saved to leaderboard!';
     } else {
       saveEl.className = 'modal-save-status unsaved';
       saveEl.innerHTML = '🔒 <a id="modal-signin-link">Sign in</a> to save your score to the leaderboard.';

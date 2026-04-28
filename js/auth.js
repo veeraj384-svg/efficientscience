@@ -1,156 +1,106 @@
 /* =========================================================
-   EfficientScience – Auth Module
-   Fully client-side: localStorage DB + synchronous JS hash.
-   No server, no Web Crypto API, works in every browser.
+   EfficientScience – Auth + Rankings
+   Server-backed (SQLite via Express on :3000).
+   All shared state lives on the server so every browser/device
+   sees the same leaderboard and the same accounts.
    ========================================================= */
 
-// ── Password hashing (synchronous, no external APIs) ─────────
-// 128-bit output using four parallel Murmur3-style streams.
-function hashPw(pw) {
-  const str = pw + ':effscience-2025';
-  const s   = [0x9368e53c, 0xf262a48d, 0x3f27d81b, 0xc5a365e9];
-  const p   = [0x9e3779b9, 0x517cc1b7, 0x27d4eb2f, 0x165667b1];
-
-  for (let i = 0; i < str.length; i++) {
-    const c = str.charCodeAt(i);
-    s[0] = (Math.imul(s[0] ^ c, p[0]) + (s[1] >>> 16)) >>> 0;
-    s[1] = (Math.imul(s[1] ^ c, p[1]) + (s[2] >>> 16)) >>> 0;
-    s[2] = (Math.imul(s[2] ^ c, p[2]) + (s[3] >>> 16)) >>> 0;
-    s[3] = (Math.imul(s[3] ^ c, p[3]) + (s[0] >>> 16)) >>> 0;
-  }
-  // finalise
-  for (let r = 0; r < 8; r++) {
-    s[0] = (Math.imul(s[0] ^ (s[3] >>> 11), p[0]) ^ (s[1] << 4)) >>> 0;
-    s[1] = (Math.imul(s[1] ^ (s[0] >>> 7),  p[1]) ^ (s[2] << 9)) >>> 0;
-    s[2] = (Math.imul(s[2] ^ (s[1] >>> 13), p[2]) ^ (s[3] << 3)) >>> 0;
-    s[3] = (Math.imul(s[3] ^ (s[2] >>> 5),  p[3]) ^ (s[0] << 7)) >>> 0;
-  }
-  return s.map(x => x.toString(16).padStart(8, '0')).join('');
-}
-
-// ── In-browser database ───────────────────────────────────────
-const DB = {
-  users()        { return JSON.parse(localStorage.getItem('sci_db_users')  || '{}'); },
-  scores()       { return JSON.parse(localStorage.getItem('sci_db_scores') || '[]'); },
-  _saveUsers(u)  { localStorage.setItem('sci_db_users',  JSON.stringify(u)); },
-  _saveScores(s) { localStorage.setItem('sci_db_scores', JSON.stringify(s)); },
-
-  register(username, email, password) {
-    const uname  = (username || '').trim();
-    const uemail = (email    || '').trim().toLowerCase();
-    if (uname.length < 3)   return { error: 'Username must be at least 3 characters.' };
-    if (!uemail.includes('@')) return { error: 'Please enter a valid email address.' };
-    if ((password || '').length < 6) return { error: 'Password must be at least 6 characters.' };
-
-    const users = this.users();
-    if (Object.values(users).some(u => u.email === uemail))
-      return { error: 'That email is already registered.' };
-    if (Object.values(users).some(u => u.username.toLowerCase() === uname.toLowerCase()))
-      return { error: 'That username is already taken.' };
-
-    const id   = 'u' + Date.now() + Math.random().toString(36).slice(2, 8);
-    const hash = hashPw(password);
-    users[id]  = { id, username: uname, email: uemail, hash, created_at: new Date().toISOString() };
-    this._saveUsers(users);
-    return { user: { id, username: uname, email: uemail } };
-  },
-
-  login(email, password) {
-    const uemail = (email || '').trim().toLowerCase();
-    if (!uemail || !password) return { error: 'Email and password are required.' };
-
-    const users = this.users();
-    const found = Object.values(users).find(u => u.email === uemail);
-    if (!found)                    return { error: 'No account found with that email.' };
-    if (hashPw(password) !== found.hash) return { error: 'Incorrect password.' };
-
-    return { user: { id: found.id, username: found.username, email: found.email } };
-  },
-
-  addScore(userId, username, payload) {
-    const scores = this.scores();
-    scores.push({ userId, username, ...payload, created_at: new Date().toISOString() });
-    this._saveScores(scores);
-  },
-
-  leaderboard() {
-    const map = {};
-    this.scores().forEach(s => {
-      if (!map[s.userId]) {
-        map[s.userId] = {
-          id: s.userId, username: s.username,
-          total_score: 0, total_correct: 0, total_answered: 0,
-          games_played: 0, _subj: {}
-        };
-      }
-      const u = map[s.userId];
-      u.total_score    += (s.score   || 0);
-      u.total_correct  += (s.correct || 0);
-      u.total_answered += (s.total   || 0);
-      u.games_played++;
-      if (s.subject && s.subject !== 'all')
-        u._subj[s.subject] = (u._subj[s.subject] || 0) + 1;
-    });
-
-    return Object.values(map)
-      .map(u => ({
-        ...u,
-        accuracy: u.total_answered
-          ? Math.round(u.total_correct / u.total_answered * 100) : 0,
-        top_subject: Object.entries(u._subj)
-          .sort((a, b) => b[1] - a[1])[0]?.[0] || null
-      }))
-      .sort((a, b) => b.total_score - a.total_score)
-      .slice(0, 50);
-  }
-};
-
-// ── Session ───────────────────────────────────────────────────
-let _user = (() => {
-  try { return JSON.parse(localStorage.getItem('sci_user') || 'null'); }
-  catch { return null; }
+const API_BASE = (() => {
+  const { protocol, hostname } = window.location;
+  return (protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1')
+    ? 'http://localhost:3000/api'
+    : '/api';
 })();
 
-function persistUser(user) {
-  _user = user;
+// ── HTTP helper ───────────────────────────────────────────────
+async function apiFetch(method, path, body, token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res  = await fetch(API_BASE + path, {
+      method, headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    return res.ok ? data : { error: data.error || `Server error (${res.status})` };
+  } catch {
+    return { _offline: true, error: 'Server offline' };
+  }
+}
+
+// ── Session (stored in localStorage so page refresh keeps login) ──
+let _token = localStorage.getItem('sci_token') || null;
+let _user  = (() => {
+  try { return JSON.parse(localStorage.getItem('sci_user') || 'null'); } catch { return null; }
+})();
+
+function _saveSession(token, user) {
+  _token = token; _user = user;
+  localStorage.setItem('sci_token', token);
   localStorage.setItem('sci_user', JSON.stringify(user));
 }
-function clearUser() {
-  _user = null;
+function _clearSession() {
+  _token = null; _user = null;
+  localStorage.removeItem('sci_token');
   localStorage.removeItem('sci_user');
 }
 
 // ── Public Auth API ───────────────────────────────────────────
 window.Auth = {
-  get isLoggedIn() { return !!_user; },
-  get user()       { return _user;   },
+  get isLoggedIn() { return !!_token && !!_user; },
+  get user()       { return _user;  },
+  get token()      { return _token; },
 
-  register(username, email, password) {
-    const d = DB.register(username, email, password);
-    if (d.user) persistUser(d.user);
+  async register(username, email, password) {
+    const d = await apiFetch('POST', '/auth/register', { username, email, password });
+    if (d.token) _saveSession(d.token, d.user);
     return d;
   },
 
-  login(email, password) {
-    const d = DB.login(email, password);
-    if (d.user) persistUser(d.user);
+  async login(email, password) {
+    const d = await apiFetch('POST', '/auth/login', { email, password });
+    if (d.token) _saveSession(d.token, d.user);
     return d;
   },
 
   logout() {
-    clearUser();
-    refreshNav();
-    document.dispatchEvent(new Event('auth:logout'));
+    _clearSession();
+    location.reload();
   },
 
-  submitScore(payload) {
-    if (!this.isLoggedIn) return;
-    DB.addScore(this.user.id, this.user.username, payload);
-    renderLeaderboard();
+  async submitScore(payload) {
+    if (!this.isLoggedIn) return { error: 'Not logged in' };
+    return apiFetch('POST', '/scores', payload, _token);
   },
 
-  fetchLeaderboard() { return DB.leaderboard(); }
+  async fetchLeaderboard() {
+    return apiFetch('GET', '/leaderboard');
+  }
 };
+
+// ── Server status banner ──────────────────────────────────────
+let _serverOnline = null; // null = unknown, true/false after check
+
+async function checkServerAndBanner() {
+  const d = await apiFetch('GET', '/leaderboard');
+  _serverOnline = !d._offline;
+
+  let banner = document.getElementById('server-banner');
+  if (_serverOnline) {
+    if (banner) banner.remove();
+    return;
+  }
+
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'server-banner';
+    banner.innerHTML = `
+      <span>⚠️ Server offline — rankings and sign-in require the server.</span>
+      <span style="opacity:.7;margin-left:8px;font-size:12px">Run <code>npm start</code> then refresh.</span>
+    `;
+    document.body.prepend(banner);
+  }
+}
 
 // ── Nav ───────────────────────────────────────────────────────
 function refreshNav() {
@@ -163,10 +113,8 @@ function refreshNav() {
           <span class="nav-username">${escHtml(Auth.user.username)}</span>
         </div>
         <button class="btn btn-ghost btn-sm" id="btn-logout-nav">Sign Out</button>`;
-      document.getElementById('btn-logout-nav').addEventListener('click', () => {
-        Auth.logout();
-        location.reload();
-      });
+      document.getElementById('btn-logout-nav')
+        .addEventListener('click', () => Auth.logout());
     } else {
       el.innerHTML = `
         <button class="btn btn-ghost btn-sm" id="btn-open-signin">Sign In</button>
@@ -178,20 +126,32 @@ function refreshNav() {
 }
 
 // ── Leaderboard renderer ──────────────────────────────────────
-function renderLeaderboard() {
+async function renderLeaderboard() {
   const wrap = document.getElementById('lb-rows');
   if (!wrap) return;
 
-  const rows = Auth.fetchLeaderboard();
+  wrap.innerHTML = `<div class="lb-loading">Loading rankings…</div>`;
 
-  if (!rows.length) {
+  const rows = await Auth.fetchLeaderboard();
+
+  if (rows._offline) {
+    wrap.innerHTML = `
+      <div class="lb-empty">
+        <div style="font-size:32px;margin-bottom:10px">🔌</div>
+        <div style="font-weight:600;margin-bottom:6px">Server offline</div>
+        <div style="font-size:13px;color:var(--text-2)">
+          Run <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px">npm start</code> then refresh to see live rankings.
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (!Array.isArray(rows) || !rows.length) {
     wrap.innerHTML = `
       <div class="lb-empty">
         <div style="font-size:36px;margin-bottom:12px">🏁</div>
         <div style="font-weight:600;margin-bottom:6px">No scores yet</div>
-        <div style="font-size:13px;color:var(--text-2)">
-          Complete a quiz to appear here!
-        </div>
+        <div style="font-size:13px;color:var(--text-2)">Complete a quiz to appear here!</div>
       </div>`;
     return;
   }
@@ -209,7 +169,7 @@ function renderLeaderboard() {
           <div class="lb-sub">${r.top_subject || 'Multi-subject'} · ${r.games_played} game${r.games_played !== 1 ? 's' : ''}</div>
         </div>
         <div style="text-align:right">
-          <div class="lb-score">${r.total_score.toLocaleString()} pts</div>
+          <div class="lb-score">${Number(r.total_score).toLocaleString()} pts</div>
           <div style="font-size:11px;color:var(--text-3)">${r.accuracy}% acc</div>
         </div>
       </div>`;
@@ -226,10 +186,9 @@ function avatarColor(name) {
   for (let i = 0; i < name.length; i++) h = (Math.imul(h, 31) + name.charCodeAt(i)) >>> 0;
   return palette[h % palette.length];
 }
-
 function escHtml(s) {
-  return String(s).replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  return String(s).replace(/[&<>"']/g,
+    c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
 // ── Auth Modal ────────────────────────────────────────────────
@@ -265,14 +224,16 @@ window.AuthModal = {
     const e = this._el?.querySelector('.auth-error');
     if (e) { e.textContent = ''; e.hidden = true; }
   },
-  _err(msg) {
+  _err(msg, isOffline) {
     const e = this._el.querySelector('.auth-error');
-    e.textContent = msg;
+    e.innerHTML = isOffline
+      ? `🔌 Server offline. Run <code>npm start</code> in the project folder, then try again.`
+      : escHtml(msg);
     e.hidden = false;
   },
-  _setBusy(btn, busy) {
-    btn.disabled    = busy;
-    btn.textContent = busy ? 'Please wait…' : (btn.dataset.label || btn.textContent);
+  _busy(btn, yes) {
+    btn.disabled    = yes;
+    btn.textContent = yes ? 'Please wait…' : btn.dataset.label;
   },
 
   _create() {
@@ -337,19 +298,12 @@ window.AuthModal = {
     document.body.appendChild(el);
     this._el = el;
 
-    // Backdrop + close button
     el.addEventListener('click', e => { if (e.target === el) this.close(); });
     el.querySelector('.auth-close-btn').addEventListener('click', () => this.close());
-
-    // Tab + switch links
     el.querySelectorAll('.auth-tab[data-tab]')
       .forEach(b => b.addEventListener('click', () => this._tab(b.dataset.tab)));
     el.querySelectorAll('[data-switch]')
-      .forEach(a => a.addEventListener('click', e => {
-        e.preventDefault(); this._tab(a.dataset.switch);
-      }));
-
-    // Password reveal
+      .forEach(a => a.addEventListener('click', e => { e.preventDefault(); this._tab(a.dataset.switch); }));
     el.querySelectorAll('.pw-toggle').forEach(btn =>
       btn.addEventListener('click', () => {
         const inp = el.querySelector('#' + btn.dataset.target);
@@ -357,57 +311,41 @@ window.AuthModal = {
         btn.textContent = inp.type === 'password' ? '👁' : '🙈';
       }));
 
-    // ── Sign In submit ──────────────────────────────────────
-    el.querySelector('[data-form="signin"]').addEventListener('submit', e => {
+    // Sign In
+    el.querySelector('[data-form="signin"]').addEventListener('submit', async e => {
       e.preventDefault();
-      const btn  = e.target.querySelector('.auth-submit');
+      const btn      = e.target.querySelector('.auth-submit');
       const email    = e.target.elements.email.value.trim();
       const password = e.target.elements.password.value;
-
       if (!email || !password) return this._err('Please fill in all fields.');
-      this._clearErr();
-      this._setBusy(btn, true);
-
-      try {
-        const d = Auth.login(email, password);
-        this._setBusy(btn, false);
-        if (d.error) return this._err(d.error);
-        e.target.reset();
-        this.close();
-        refreshNav();
-        renderLeaderboard();
-        document.dispatchEvent(new CustomEvent('auth:login', { detail: d.user }));
-      } catch (err) {
-        this._setBusy(btn, false);
-        this._err('Something went wrong. Please try again.');
-      }
+      this._clearErr(); this._busy(btn, true);
+      const d = await Auth.login(email, password);
+      this._busy(btn, false);
+      if (d._offline) return this._err('', true);
+      if (d.error)    return this._err(d.error);
+      e.target.reset();
+      this.close();
+      refreshNav();
+      renderLeaderboard();
     });
 
-    // ── Sign Up submit ──────────────────────────────────────
-    el.querySelector('[data-form="signup"]').addEventListener('submit', e => {
+    // Sign Up
+    el.querySelector('[data-form="signup"]').addEventListener('submit', async e => {
       e.preventDefault();
       const btn      = e.target.querySelector('.auth-submit');
       const username = e.target.elements.username.value.trim();
       const email    = e.target.elements.email.value.trim();
       const password = e.target.elements.password.value;
-
       if (!username || !email || !password) return this._err('Please fill in all fields.');
-      this._clearErr();
-      this._setBusy(btn, true);
-
-      try {
-        const d = Auth.register(username, email, password);
-        this._setBusy(btn, false);
-        if (d.error) return this._err(d.error);
-        e.target.reset();
-        this.close();
-        refreshNav();
-        renderLeaderboard();
-        document.dispatchEvent(new CustomEvent('auth:login', { detail: d.user }));
-      } catch (err) {
-        this._setBusy(btn, false);
-        this._err('Something went wrong. Please try again.');
-      }
+      this._clearErr(); this._busy(btn, true);
+      const d = await Auth.register(username, email, password);
+      this._busy(btn, false);
+      if (d._offline) return this._err('', true);
+      if (d.error)    return this._err(d.error);
+      e.target.reset();
+      this.close();
+      refreshNav();
+      renderLeaderboard();
     });
   }
 };
@@ -416,4 +354,5 @@ window.AuthModal = {
 document.addEventListener('DOMContentLoaded', () => {
   refreshNav();
   renderLeaderboard();
+  checkServerAndBanner();
 });
