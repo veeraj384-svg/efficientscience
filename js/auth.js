@@ -4,10 +4,13 @@
    ========================================================= */
 
 const API = (() => {
-  const h = window.location.hostname;
-  return (h === 'localhost' || h === '127.0.0.1')
-    ? 'http://localhost:3000/api'
-    : '/api';
+  const { hostname, protocol, port } = window.location;
+  // Opened as a file:// OR served from the Node server on :3000
+  if (protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3000/api';
+  }
+  // Same-origin deploy (production)
+  return '/api';
 })();
 
 let _token = localStorage.getItem('sci_token') || null;
