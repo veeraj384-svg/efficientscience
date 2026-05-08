@@ -1,4 +1,2 @@
 node_modules/
-server/database.db
-server/server.log
 *.log

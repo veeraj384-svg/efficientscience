@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topics — EfficientScience</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<canvas id="star-canvas"></canvas>
+
+<nav class="nav scrolled">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">⚗️</div>
+      <span>EfficientScience</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="practice.html">Practice</a></li>
+      <li><a href="topics.html" class="active">Topics</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="practice.html" class="btn btn-primary btn-sm">Start Practicing</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container topics-page">
+
+  <div class="section-header" style="margin-bottom:32px">
+    <span class="badge">Good to Know</span>
+    <h2 style="margin-top:16px;font-size:clamp(24px,4vw,40px);letter-spacing:-1px">
+      Science <span class="grad-text">Topics</span>
+    </h2>
+    <p style="margin-top:10px">Browse key concepts across all competition subjects. Click any topic to learn more.</p>
+  </div>
+
+  <div class="topics-search-wrap">
+    <span class="topics-search-icon">🔍</span>
+    <input type="text" class="topics-search" id="topic-search" placeholder="Search for a topic…" autocomplete="off" />
+  </div>
+
+  <!-- Biology -->
+  <div class="topics-section" data-subject="Biology">
+    <div class="topics-section-title">🧬 Biology</div>
+    <div class="topic-pills" id="pills-biology"></div>
+  </div>
+
+  <!-- Chemistry -->
+  <div class="topics-section" data-subject="Chemistry">
+    <div class="topics-section-title">🧪 Chemistry</div>
+    <div class="topic-pills" id="pills-chemistry"></div>
+  </div>
+
+  <!-- Physics -->
+  <div class="topics-section" data-subject="Physics">
+    <div class="topics-section-title">⚛️ Physics</div>
+    <div class="topic-pills" id="pills-physics"></div>
+  </div>
+
+  <!-- Astronomy -->
+  <div class="topics-section" data-subject="Astronomy">
+    <div class="topics-section-title">🔭 Astronomy &amp; Space</div>
+    <div class="topic-pills" id="pills-astronomy"></div>
+  </div>
+
+  <!-- Earth Science -->
+  <div class="topics-section" data-subject="Earth Science">
+    <div class="topics-section-title">🌍 Earth Science</div>
+    <div class="topic-pills" id="pills-earth"></div>
+  </div>
+
+  <!-- Environmental -->
+  <div class="topics-section" data-subject="Environmental">
+    <div class="topics-section-title">🌿 Environmental Science</div>
+    <div class="topic-pills" id="pills-env"></div>
+  </div>
+
+</div>
+
+<!-- Topic Modal -->
+<div class="topic-modal-overlay" id="topic-modal-overlay">
+  <div class="topic-modal">
+    <button class="topic-modal-close" id="topic-modal-close">✕</button>
+    <div class="topic-modal-subject" id="tm-subject"></div>
+    <div class="topic-modal-title" id="tm-title"></div>
+    <div class="topic-modal-body" id="tm-body"></div>
+    <div class="topic-modal-facts" id="tm-facts-wrap">
+      <h4>Key Facts</h4>
+      <ul id="tm-facts"></ul>
+    </div>
+    <a class="topic-modal-link" id="tm-wiki" href="#" target="_blank" rel="noopener">
+      View on Wikipedia →
+    </a>
+  </div>
+</div>
+
+<script>
+const TOPICS = {
+  Biology: [
+    { name: "DNA", body: "Deoxyribonucleic acid — the molecule that carries genetic instructions for the development, functioning, growth, and reproduction of all known organisms.", facts: ["Double helix structure discovered by Watson and Crick in 1953","Made of four nucleotide bases: A, T, G, C","Humans have ~3 billion base pairs in each cell","DNA is read in codons (3-base triplets) to make proteins"], wiki: "DNA" },
+    { name: "RNA", body: "Ribonucleic acid — a single-stranded molecule involved in coding, decoding, regulation, and expression of genes.", facts: ["Three main types: mRNA, tRNA, rRNA","mRNA carries genetic code from DNA to ribosomes","tRNA brings amino acids during translation","RNA uses uracil (U) instead of thymine (T)"], wiki: "RNA" },
+    { name: "Photosynthesis", body: "The process by which plants, algae, and some bacteria convert light energy into chemical energy stored in glucose.", facts: ["Equation: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂","Occurs in chloroplasts","Light reactions occur in thylakoid membranes","Calvin cycle occurs in the stroma"], wiki: "Photosynthesis" },
+    { name: "Cellular Respiration", body: "The set of metabolic reactions that convert biochemical energy from nutrients into ATP.", facts: ["Equation: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + 36-38 ATP","Three stages: glycolysis, Krebs cycle, electron transport chain","Glycolysis occurs in cytoplasm, rest in mitochondria","Anaerobic respiration produces lactic acid or ethanol"], wiki: "Cellular_respiration" },
+    { name: "Mitosis", body: "Cell division producing two genetically identical daughter cells for growth and repair.", facts: ["Phases: Prophase, Metaphase, Anaphase, Telophase (PMAT)","Preceded by interphase (DNA replication)","Results in 2 diploid cells","Controlled by cyclins and CDKs"], wiki: "Mitosis" },
+    { name: "Meiosis", body: "Cell division that produces four genetically unique haploid gametes for sexual reproduction.", facts: ["Two rounds of division: Meiosis I and II","Results in 4 haploid cells","Crossing over in Prophase I increases genetic diversity","Produces eggs and sperm"], wiki: "Meiosis" },
+    { name: "Natural Selection", body: "The mechanism of evolution by which organisms with favorable traits survive and reproduce more successfully.", facts: ["Proposed by Charles Darwin in 1859","Requires variation, heritability, and differential fitness","Acts on phenotype, but heritable genotype is passed on","Types: directional, stabilizing, disruptive"], wiki: "Natural_selection" },
+    { name: "Enzyme", body: "Biological catalysts — proteins that speed up chemical reactions without being consumed.", facts: ["Enzymes are substrate-specific (lock-and-key model)","Active site binds substrate to form enzyme-substrate complex","Temperature and pH affect enzyme activity","Inhibitors can be competitive or non-competitive"], wiki: "Enzyme" },
+    { name: "ATP", body: "Adenosine triphosphate — the primary energy currency of the cell.", facts: ["Stores energy in phosphate bonds","Hydrolysis of ATP → ADP + Pᵢ releases ~7.3 kcal/mol","Made in mitochondria via oxidative phosphorylation","Used for muscle contraction, active transport, biosynthesis"], wiki: "Adenosine_triphosphate" },
+    { name: "Osmosis", body: "The movement of water across a semipermeable membrane from a region of low solute concentration to high solute concentration.", facts: ["Passive process requiring no energy","Osmotic pressure drives water movement","Hypertonic, hypotonic, and isotonic solutions","Plant turgor pressure relies on osmosis"], wiki: "Osmosis" },
+    { name: "Genetics", body: "The study of genes, heredity, and genetic variation in organisms.", facts: ["Mendel's laws: segregation and independent assortment","Dominant alleles mask recessive alleles","Codominance: both alleles expressed equally","Sex-linked traits carried on X or Y chromosome"], wiki: "Genetics" },
+    { name: "CRISPR", body: "A gene-editing technology based on a bacterial immune defense system that allows precise modification of DNA sequences.", facts: ["Stands for Clustered Regularly Interspaced Short Palindromic Repeats","Cas9 protein acts as molecular scissors","Can add, remove, or alter DNA sequences","Used in medicine, agriculture, and basic research"], wiki: "CRISPR" },
+    { name: "Protein Synthesis", body: "The process of translating genetic information into functional proteins via transcription and translation.", facts: ["Transcription: DNA → mRNA in nucleus","Translation: mRNA → protein at ribosomes","64 codons encode 20 amino acids (+ stop codons)","Start codon: AUG (methionine)"], wiki: "Protein_biosynthesis" },
+    { name: "Ecosystem", body: "A biological community of interacting organisms and their physical environment.", facts: ["Includes biotic (living) and abiotic (nonliving) components","Energy flows through trophic levels","Matter is cycled (carbon, nitrogen, water cycles)","Primary producers convert sunlight to chemical energy"], wiki: "Ecosystem" },
+    { name: "Evolution", body: "The change in heritable characteristics of biological populations over successive generations.", facts: ["Theory supported by fossil record, genetics, anatomy","Speciation occurs when populations are reproductively isolated","Convergent evolution produces similar traits independently","Molecular clock uses mutation rates to estimate divergence times"], wiki: "Evolution" },
+    { name: "Cell Theory", body: "The fundamental theory of biology stating that all living things are made of cells.", facts: ["All organisms are made of one or more cells","The cell is the basic unit of life","All cells arise from pre-existing cells","Proposed by Schleiden, Schwann, and Virchow"], wiki: "Cell_theory" },
+  ],
+  Chemistry: [
+    { name: "Periodic Table", body: "An arrangement of chemical elements ordered by atomic number, electron configuration, and recurring chemical properties.", facts: ["118 confirmed elements","Periods (rows) and groups (columns) reflect electron configuration","Dmitri Mendeleev published first periodic table in 1869","Metals, nonmetals, and metalloids are major categories"], wiki: "Periodic_table" },
+    { name: "Chemical Bonding", body: "The attraction between atoms that holds them together to form molecules and compounds.", facts: ["Ionic bonds: electron transfer between metals and nonmetals","Covalent bonds: electron sharing between nonmetals","Metallic bonds: delocalized electrons in metal lattice","Bond polarity determined by electronegativity difference"], wiki: "Chemical_bond" },
+    { name: "Stoichiometry", body: "The branch of chemistry dealing with quantitative relationships between reactants and products in chemical reactions.", facts: ["Based on the law of conservation of mass","Molar ratios from balanced equations are key","Limiting reagent determines maximum yield","Percent yield = (actual/theoretical) × 100%"], wiki: "Stoichiometry" },
+    { name: "Acids and Bases", body: "Acids donate protons (H⁺) while bases accept protons; measured on the pH scale from 0–14.", facts: ["pH = −log[H⁺]","Strong acids/bases fully dissociate","Buffer solutions resist pH changes","Neutralization: acid + base → salt + water"], wiki: "Acid–base_reaction" },
+    { name: "Le Chatelier's Principle", body: "When a system at equilibrium is disturbed, it shifts to counteract the disturbance and re-establish equilibrium.", facts: ["Applies to reversible reactions","Increasing concentration of reactant shifts equilibrium right","Increasing pressure favors side with fewer moles of gas","Increasing temperature favors endothermic direction"], wiki: "Le_Chatelier%27s_principle" },
+    { name: "Electrochemistry", body: "The study of chemical processes that cause electrons to move, producing electricity (and vice versa).", facts: ["Oxidation: loss of electrons; Reduction: gain of electrons","Galvanic cells convert chemical energy to electricity","Electrolytic cells use electricity to drive non-spontaneous reactions","Standard reduction potentials predict cell voltage"], wiki: "Electrochemistry" },
+    { name: "Thermochemistry", body: "The study of heat energy associated with chemical reactions and physical transformations.", facts: ["Exothermic reactions release heat (ΔH < 0)","Endothermic reactions absorb heat (ΔH > 0)","Hess's Law: ΔH is path-independent","Standard enthalpy of formation (ΔH°f) for reference"], wiki: "Thermochemistry" },
+    { name: "Organic Chemistry", body: "The study of carbon-containing compounds and their reactions.", facts: ["Carbon forms 4 bonds; can chain and ring","Functional groups determine reactivity","Alkanes, alkenes, alkynes, aromatics are major classes","IUPAC naming system provides systematic nomenclature"], wiki: "Organic_chemistry" },
+    { name: "Quantum Numbers", body: "Four numbers describing the unique quantum state of an electron in an atom.", facts: ["n: principal (energy level)","l: azimuthal (subshell shape, 0=s, 1=p, 2=d, 3=f)","mₗ: magnetic (orbital orientation)","mₛ: spin (+½ or −½)"], wiki: "Quantum_number" },
+    { name: "Reaction Kinetics", body: "The study of the rates of chemical reactions and the factors that affect them.", facts: ["Rate depends on concentration, temperature, surface area, catalyst","Activation energy is the energy barrier for reaction","Arrhenius equation: k = Ae^(−Ea/RT)","Catalysts lower activation energy without being consumed"], wiki: "Chemical_kinetics" },
+    { name: "Mole Concept", body: "The mole is the SI unit for amount of substance, equal to 6.022 × 10²³ entities.", facts: ["Avogadro's number: 6.022 × 10²³","1 mol of any gas at STP occupies 22.4 L","Molar mass in g/mol numerically equals atomic/molecular mass in amu","Connects microscopic particles to measurable quantities"], wiki: "Mole_(unit)" },
+    { name: "Nuclear Chemistry", body: "The study of reactions involving changes in atomic nuclei, including radioactive decay and fission/fusion.", facts: ["Alpha decay: emits ⁴₂He nucleus","Beta decay: neutron → proton + electron + antineutrino","Gamma radiation: high-energy photon emission","Half-life: time for half a sample to decay"], wiki: "Nuclear_chemistry" },
+  ],
+  Physics: [
+    { name: "Newton's Laws", body: "Three fundamental laws describing the relationship between motion and forces.", facts: ["1st: Objects at rest stay at rest unless acted on by net force","2nd: F = ma (net force = mass × acceleration)","3rd: Every action has equal and opposite reaction","Foundation of classical mechanics"], wiki: "Newton%27s_laws_of_motion" },
+    { name: "Conservation of Energy", body: "Energy cannot be created or destroyed, only transformed from one form to another.", facts: ["Total energy in an isolated system is constant","KE = ½mv², PE = mgh","Work-energy theorem: W = ΔKE","Applies in mechanics, thermodynamics, and electromagnetism"], wiki: "Conservation_of_energy" },
+    { name: "Special Relativity", body: "Einstein's theory describing physics in inertial reference frames at all speeds, including near light speed.", facts: ["Postulates: laws of physics same in all inertial frames; speed of light is constant","Time dilation: moving clocks run slow","Length contraction: moving objects appear shorter","E = mc²: mass-energy equivalence"], wiki: "Special_relativity" },
+    { name: "Quantum Mechanics", body: "The branch of physics describing nature at atomic and subatomic scales.", facts: ["Wave-particle duality: light and matter show both behaviors","Heisenberg uncertainty principle: Δx·Δp ≥ ℏ/2","Schrödinger equation describes quantum state evolution","Quantization: energy comes in discrete packets (quanta)"], wiki: "Quantum_mechanics" },
+    { name: "Electromagnetic Spectrum", body: "The range of all types of electromagnetic radiation, from radio waves to gamma rays.", facts: ["All travel at c = 3×10⁸ m/s in vacuum","E = hf (energy proportional to frequency)","Visible light: ~400–700 nm wavelength","Radio < Microwave < IR < Visible < UV < X-ray < Gamma"], wiki: "Electromagnetic_spectrum" },
+    { name: "Thermodynamics", body: "The study of heat, work, temperature, and their relationship to energy and entropy.", facts: ["0th Law: thermal equilibrium and temperature","1st Law: ΔU = Q − W (energy conservation)","2nd Law: entropy of isolated system never decreases","3rd Law: entropy approaches constant as T → 0 K"], wiki: "Thermodynamics" },
+    { name: "Ohm's Law", body: "The current through a conductor is directly proportional to the voltage and inversely proportional to resistance.", facts: ["V = IR","Resistance measured in ohms (Ω)","Applies to ohmic (linear) conductors","Power: P = IV = I²R = V²/R"], wiki: "Ohm%27s_law" },
+    { name: "Photoelectric Effect", body: "The emission of electrons from a surface when light of sufficient frequency shines on it.", facts: ["Explained by Einstein in 1905 (Nobel Prize 1921)","Shows light has particle nature (photons)","Threshold frequency must be met regardless of intensity","KE_max = hf − φ (work function)"], wiki: "Photoelectric_effect" },
+    { name: "Wave Properties", body: "Characteristics of waves including wavelength, frequency, amplitude, and speed.", facts: ["v = fλ (speed = frequency × wavelength)","Transverse waves: displacement perpendicular to propagation","Longitudinal waves: displacement parallel to propagation","Interference, diffraction, and reflection are wave phenomena"], wiki: "Wave" },
+    { name: "Momentum", body: "A vector quantity defined as the product of an object's mass and velocity.", facts: ["p = mv","Conservation of momentum in isolated systems","Impulse: J = FΔt = Δp","Elastic collision: KE conserved; inelastic: KE not conserved"], wiki: "Momentum" },
+    { name: "Gravitational Force", body: "The attractive force between any two masses, described by Newton's law of universal gravitation.", facts: ["F = Gm₁m₂/r²","G = 6.674 × 10⁻¹¹ N·m²/kg²","At Earth's surface: g ≈ 9.81 m/s²","Einstein's GR: gravity is curvature of spacetime"], wiki: "Gravity" },
+    { name: "Doppler Effect", body: "The change in frequency of a wave as its source moves relative to the observer.", facts: ["Source approaching: frequency increases (blue shift)","Source receding: frequency decreases (red shift)","Used in radar, medical ultrasound, astronomy","Hubble used redshift to discover universe expansion"], wiki: "Doppler_effect" },
+  ],
+  Astronomy: [
+    { name: "Stellar Evolution", body: "The process by which stars change over time, from formation to their final state.", facts: ["Stars form in nebulae from gas and dust","Main sequence: hydrogen fusion in core","Sun's lifespan: ~10 billion years","Massive stars end as supernovae, then neutron stars or black holes"], wiki: "Stellar_evolution" },
+    { name: "Black Holes", body: "Regions of spacetime where gravity is so strong that nothing, not even light, can escape.", facts: ["Schwarzschild radius: r_s = 2GM/c²","Event horizon: boundary of no return","Hawking radiation: black holes slowly evaporate","Supermassive black holes exist at centers of most galaxies"], wiki: "Black_hole" },
+    { name: "Big Bang Theory", body: "The prevailing cosmological model explaining the origin and evolution of the universe.", facts: ["Universe began ~13.8 billion years ago from extremely hot, dense state","Cosmic microwave background (CMB) is afterglow of Big Bang","Universe is still expanding (Hubble's Law)","Nucleosynthesis of H, He, Li in first minutes"], wiki: "Big_Bang" },
+    { name: "Kepler's Laws", body: "Three laws describing planetary motion around the Sun.", facts: ["1st: Planets orbit in ellipses with Sun at one focus","2nd: Planet sweeps equal areas in equal times","3rd: T² ∝ a³ (period² proportional to semi-major axis³)","Derived by Newton using gravity"], wiki: "Kepler%27s_laws_of_planetary_motion" },
+    { name: "Hubble's Law", body: "The observation that galaxies recede from us at speeds proportional to their distance.", facts: ["v = H₀d","H₀ ≈ 70 km/s/Mpc (Hubble constant)","Evidence for expanding universe","Allows calculation of universe's age (~13.8 Gyr)"], wiki: "Hubble%27s_law" },
+    { name: "Hertzsprung-Russell Diagram", body: "A scatter plot of stars showing the relationship between luminosity and temperature/spectral type.", facts: ["Main sequence: stable hydrogen-burning stars","Giants and supergiants in upper right","White dwarfs in lower left","Sun is a G-type main sequence star (G2V)"], wiki: "Hertzsprung%E2%80%93Russell_diagram" },
+    { name: "Dark Matter", body: "Hypothetical matter that doesn't interact with electromagnetic radiation but exerts gravitational effects.", facts: ["Makes up ~27% of universe's mass-energy","Evidence: galaxy rotation curves, gravitational lensing","Does not emit, absorb, or reflect light","WIMPs and axions are leading candidates"], wiki: "Dark_matter" },
+    { name: "Neutron Stars", body: "Extremely dense remnants of massive stars after supernova explosions.", facts: ["Mass: ~1.4–2 M☉, radius: ~10 km","Density: ~10¹⁷ kg/m³ (a teaspoon weighs ~1 billion tons)","Pulsars: rotating neutron stars emitting beams of radiation","Magnetars have extremely strong magnetic fields"], wiki: "Neutron_star" },
+    { name: "Solar System", body: "The Sun and all celestial objects gravitationally bound to it, including 8 planets.", facts: ["8 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune","Asteroid belt between Mars and Jupiter","Kuiper belt beyond Neptune","Oort cloud is source of long-period comets"], wiki: "Solar_System" },
+    { name: "Spectroscopy", body: "The study of the interaction between matter and electromagnetic radiation, used to identify elements in stars.", facts: ["Each element has a unique spectral fingerprint","Emission spectra: bright lines on dark background","Absorption spectra: dark lines on continuous spectrum","Used to measure stellar composition, temperature, velocity"], wiki: "Spectroscopy" },
+  ],
+  "Earth Science": [
+    { name: "Plate Tectonics", body: "The theory that Earth's lithosphere is divided into plates that move on the asthenosphere.", facts: ["Convergent, divergent, and transform boundaries","Subduction zones: denser plate sinks under lighter one","Mid-ocean ridges: new crust forms at divergent boundaries","Seafloor spreading evidence: magnetic striping"], wiki: "Plate_tectonics" },
+    { name: "Rock Cycle", body: "The continuous process by which rocks transform between igneous, sedimentary, and metamorphic types.", facts: ["Igneous: formed from cooling magma/lava","Sedimentary: formed from compacted sediments","Metamorphic: transformed by heat and pressure","Uplift, weathering, and erosion drive the cycle"], wiki: "Rock_cycle" },
+    { name: "Earthquakes", body: "Shaking of Earth's surface caused by sudden release of energy in the lithosphere.", facts: ["Focus (hypocenter): origin of earthquake","Epicenter: point on surface directly above focus","P-waves (primary) travel through solid and liquid; S-waves (secondary) only through solid","Richter and moment magnitude scales measure size"], wiki: "Earthquake" },
+    { name: "Volcanoes", body: "Openings in Earth's crust through which molten rock, ash, and gases erupt.", facts: ["Shield volcanoes: broad, gentle slopes (e.g., Hawaiian)","Composite/stratovolcanoes: steep, explosive (e.g., Mount St. Helens)","Hotspots: magma plumes through plate (e.g., Hawaii, Yellowstone)","Pyroclastic flows are extremely dangerous"], wiki: "Volcano" },
+    { name: "Geologic Time Scale", body: "The framework for understanding the timing and relationships of events in Earth's history.", facts: ["Earth is ~4.6 billion years old","Eons → Eras → Periods → Epochs","Cambrian explosion: ~541 million years ago","Mass extinctions mark major boundaries (K-Pg, P-T)"], wiki: "Geologic_time_scale" },
+    { name: "Water Cycle", body: "The continuous movement of water through Earth's systems: evaporation, condensation, precipitation, and collection.", facts: ["Solar energy drives evaporation","Transpiration from plants contributes water vapor","Groundwater is stored in aquifers","Runoff returns water to oceans and lakes"], wiki: "Water_cycle" },
+    { name: "Atmosphere", body: "The layer of gases surrounding Earth, held in place by gravity.", facts: ["Layers: Troposphere, Stratosphere, Mesosphere, Thermosphere, Exosphere","78% N₂, 21% O₂, 0.04% CO₂ (by volume)","Ozone layer in stratosphere absorbs UV radiation","Troposphere contains weather; temperature decreases with altitude"], wiki: "Atmosphere_of_Earth" },
+    { name: "Ocean Currents", body: "Large-scale movement of ocean water driven by wind, temperature, salinity, and Earth's rotation.", facts: ["Thermohaline circulation: density-driven global conveyor belt","Surface currents driven by wind and Coriolis effect","Gulf Stream moderates European climate","El Niño: warm water shifts in Pacific affecting global weather"], wiki: "Ocean_current" },
+    { name: "Weathering and Erosion", body: "The breakdown of rocks (weathering) and transport of material (erosion) that shape Earth's surface.", facts: ["Chemical weathering: hydrolysis, oxidation, dissolution","Mechanical/physical weathering: freeze-thaw, abrasion","Erosion agents: water, wind, ice, gravity","Deposition creates sedimentary landforms (deltas, dunes)"], wiki: "Weathering" },
+  ],
+  Environmental: [
+    { name: "Climate Change", body: "Long-term shifts in global temperatures and weather patterns, largely driven by human activities since the Industrial Revolution.", facts: ["CO₂ levels have risen from ~280 ppm (pre-industrial) to ~420 ppm","Average global temperature risen ~1.1°C since 1850","IPCC reports assess scientific consensus","Consequences: sea level rise, extreme weather, habitat loss"], wiki: "Climate_change" },
+    { name: "Greenhouse Effect", body: "The process by which certain gases trap heat in Earth's atmosphere, warming the planet.", facts: ["Greenhouse gases: CO₂, CH₄, N₂O, H₂O, O₃","Natural greenhouse effect keeps Earth ~33°C warmer than without atmosphere","Enhanced greenhouse effect from human emissions causes global warming","CO₂ persists in atmosphere for centuries"], wiki: "Greenhouse_effect" },
+    { name: "Carbon Cycle", body: "The biogeochemical cycle by which carbon is exchanged among the biosphere, geosphere, oceans, and atmosphere.", facts: ["Photosynthesis fixes CO₂; respiration and decomposition release it","Oceans absorb ~25% of anthropogenic CO₂ emissions","Fossil fuels are ancient stored carbon","Carbon reservoirs: atmosphere, oceans, vegetation, soil, sedimentary rock"], wiki: "Carbon_cycle" },
+    { name: "Biodiversity", body: "The variety of life on Earth at all its levels, from genes to ecosystems.", facts: ["~8.7 million eukaryotic species estimated, ~1.5 million described","Biodiversity hotspots: regions with exceptional richness and threat","Current extinction rate: 100–1,000× background rate","Ecosystem services depend on biodiversity"], wiki: "Biodiversity" },
+    { name: "Nitrogen Cycle", body: "The biogeochemical cycle by which nitrogen is converted between its various chemical forms.", facts: ["78% of atmosphere is N₂ (inert)","Nitrogen fixation: N₂ → NH₃ (bacteria, lightning)","Nitrification: NH₃ → NO₂⁻ → NO₃⁻","Denitrification: NO₃⁻ → N₂ (returns to atmosphere)"], wiki: "Nitrogen_cycle" },
+    { name: "Renewable Energy", body: "Energy from naturally replenishing sources such as sun, wind, water, and geothermal heat.", facts: ["Solar: photovoltaic and concentrated solar power","Wind: fastest-growing energy source globally","Hydropower: largest source of renewable electricity","Global renewable capacity has doubled in the past decade"], wiki: "Renewable_energy" },
+    { name: "Ozone Layer", body: "A region of Earth's stratosphere containing high concentrations of ozone (O₃) that absorbs UV radiation.", facts: ["Located 15–35 km altitude in stratosphere","CFCs deplete ozone; Montreal Protocol (1987) banned them","Antarctic ozone hole discovered 1985","Ozone layer is recovering thanks to international action"], wiki: "Ozone_layer" },
+    { name: "Food Web", body: "A system of interlocking food chains showing feeding relationships within an ecological community.", facts: ["Producers (plants) → Primary consumers → Secondary consumers → Apex predators","Only ~10% of energy transfers between trophic levels","Trophic cascade: removal of apex predator affects whole ecosystem","Decomposers recycle nutrients back to producers"], wiki: "Food_web" },
+  ]
+};
+
+const WIKI_BASE = 'https://en.wikipedia.org/wiki/';
+
+function buildTopics() {
+  const map = {
+    Biology: 'pills-biology',
+    Chemistry: 'pills-chemistry',
+    Physics: 'pills-physics',
+    Astronomy: 'pills-astronomy',
+    'Earth Science': 'pills-earth',
+    Environmental: 'pills-env'
+  };
+  Object.entries(TOPICS).forEach(([subject, topics]) => {
+    const container = document.getElementById(map[subject]);
+    if (!container) return;
+    topics.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'topic-pill';
+      btn.textContent = t.name;
+      btn.dataset.subject = subject;
+      btn.dataset.name = t.name.toLowerCase();
+      btn.addEventListener('click', () => openModal(subject, t));
+      container.appendChild(btn);
+    });
+  });
+}
+
+function openModal(subject, t) {
+  document.getElementById('tm-subject').textContent  = subject;
+  document.getElementById('tm-title').textContent    = t.name;
+  document.getElementById('tm-body').textContent     = t.body;
+  document.getElementById('tm-wiki').href            = WIKI_BASE + t.wiki;
+  const ul = document.getElementById('tm-facts');
+  ul.innerHTML = t.facts.map(f => `<li>${f}</li>`).join('');
+  document.getElementById('topic-modal-overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('topic-modal-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('topic-modal-close').addEventListener('click', closeModal);
+document.getElementById('topic-modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('topic-modal-overlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+document.getElementById('topic-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.topic-pill').forEach(pill => {
+    pill.classList.toggle('hidden', q.length > 0 && !pill.dataset.name.includes(q));
+  });
+  document.querySelectorAll('.topics-section').forEach(section => {
+    const visible = [...section.querySelectorAll('.topic-pill')].some(p => !p.classList.contains('hidden'));
+    section.style.display = (q.length > 0 && !visible) ? 'none' : '';
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildTopics();
+});
+</script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -89,7 +89,7 @@ function initDemoQuestion() {
   const opts = document.querySelectorAll('.qm-opt');
   const exp  = document.querySelector('.qm-explanation');
   if (!opts.length) return;
-  const correct = 1; // index of correct answer for demo
+  const correct = 1;
   opts.forEach((opt, i) => {
     opt.addEventListener('click', () => {
       if (document.querySelector('.qm-opt.correct')) return;
@@ -127,12 +127,6 @@ const PracticeEngine = (() => {
 
   const TOTAL_Q = 10;
 
-  // Session stats from localStorage
-  function loadStats() {
-    return JSON.parse(localStorage.getItem('sciStats') || '{"total":0,"correct":0,"streak":0,"maxStreak":0}');
-  }
-  function saveStats(s) { localStorage.setItem('sciStats', JSON.stringify(s)); }
-
   function getFiltered() {
     return PROBLEMS.filter(p =>
       (currentSubject === 'all' || p.subject === currentSubject) &&
@@ -156,35 +150,51 @@ const PracticeEngine = (() => {
     idx = 0; score = 0; correct = 0; incorrect = 0;
   }
 
+  function updateHeader() {
+    const title = document.getElementById('qc-title');
+    const sub   = document.getElementById('qc-sub');
+    if (title) title.textContent = currentSubject === 'all' ? 'Science Practice' : currentSubject + ' Practice';
+    if (sub) {
+      const g = currentGrade   === 'all' ? 'All Levels'   : currentGrade;
+      const d = currentDiff    === 'all' ? ''             : ' · ' + currentDiff;
+      sub.textContent = g + d;
+    }
+  }
+
+  function updateStatsBar() {
+    const scoreEl  = document.getElementById('stat-score');
+    const qnumEl   = document.getElementById('stat-qnum');
+    const qtotalEl = document.getElementById('stat-qtotal');
+    if (scoreEl)  scoreEl.textContent  = score;
+    if (qnumEl)   qnumEl.textContent   = queue.length ? idx + 1 : '—';
+    if (qtotalEl) qtotalEl.textContent = queue.length || '—';
+  }
+
   function render() {
     if (!queue.length) {
       document.getElementById('quiz-empty').style.display = 'block';
       document.getElementById('quiz-card').style.display  = 'none';
+      updateStatsBar();
       return;
     }
     document.getElementById('quiz-empty').style.display = 'none';
     document.getElementById('quiz-card').style.display  = 'block';
 
-    const p = queue[idx];
+    const p     = queue[idx];
     const total = queue.length;
 
-    // progress bar
-    const pct = (idx / total) * 100;
-    document.getElementById('quiz-progress-bar').style.width = pct + '%';
-    document.getElementById('quiz-progress-text').textContent = `Question ${idx + 1} of ${total}`;
+    document.getElementById('quiz-progress-bar').style.width = (idx / total * 100) + '%';
+    updateStatsBar();
 
-    // meta tags
     const subTag  = document.getElementById('quiz-subject-tag');
     const diffTag = document.getElementById('quiz-diff-tag');
     subTag.textContent  = p.subject;
-    subTag.className = `tag tag-${p.subject.toLowerCase().replace(' ','')}`;
+    subTag.className    = `tag tag-${p.subject.toLowerCase().replace(/\s+/g,'')}`;
     diffTag.textContent = p.difficulty;
-    diffTag.className = `tag tag-${p.difficulty.toLowerCase()}`;
-
-    document.getElementById('quiz-num').textContent   = `#${p.id}  ·  ${p.topic}`;
+    diffTag.className   = `tag tag-${p.difficulty.toLowerCase()}`;
+    document.getElementById('quiz-num').textContent = `#${p.id}  ·  ${p.topic}`;
     document.getElementById('quiz-question').textContent = p.question;
 
-    // options
     const container = document.getElementById('quiz-options');
     container.innerHTML = '';
     p.options.forEach((opt, i) => {
@@ -195,18 +205,15 @@ const PracticeEngine = (() => {
       container.appendChild(btn);
     });
 
-    // explanation
     const expBox = document.getElementById('quiz-explanation');
     expBox.classList.remove('show');
     expBox.querySelector('p').textContent = p.explanation;
 
-    // next button
     document.getElementById('btn-next').textContent = (idx === total - 1) ? 'Finish Quiz' : 'Next Question →';
     document.getElementById('btn-next').style.display = 'none';
 
     answered = false;
     resetTimer();
-    updateSidebarStats();
   }
 
   function handleAnswer(i) {
@@ -223,20 +230,20 @@ const PracticeEngine = (() => {
     document.getElementById('quiz-explanation').classList.add('show');
     document.getElementById('btn-next').style.display = 'inline-flex';
 
-    const stats = loadStats();
-    stats.total++;
     if (i === p.answer) {
       correct++;
       score += difficultyPoints(p.difficulty);
-      stats.correct++;
-      stats.streak++;
-      stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
     } else {
       incorrect++;
-      stats.streak = 0;
     }
-    saveStats(stats);
-    updateSidebarStats();
+    updateStatsBar();
+
+    // persist session stats
+    const s = JSON.parse(localStorage.getItem('sciStats') || '{"total":0,"correct":0,"streak":0}');
+    s.total++;
+    if (i === p.answer) { s.correct++; s.streak = (s.streak || 0) + 1; }
+    else { s.streak = 0; }
+    localStorage.setItem('sciStats', JSON.stringify(s));
   }
 
   function difficultyPoints(d) {
@@ -265,8 +272,8 @@ const PracticeEngine = (() => {
     if (!el) return;
     const m = Math.floor(secondsLeft / 60);
     const s = String(secondsLeft % 60).padStart(2, '0');
-    el.textContent = `⏱ ${m}:${s}`;
-    el.className = 'timer-display' + (secondsLeft <= 10 ? ' danger' : secondsLeft <= 30 ? ' warning' : '');
+    el.textContent = `${m}:${s}`;
+    el.className = 'qcs-val' + (secondsLeft <= 10 ? ' timer-danger' : secondsLeft <= 30 ? ' timer-warn' : '');
   }
 
   function showSummary() {
@@ -275,13 +282,12 @@ const PracticeEngine = (() => {
     const pct   = Math.round((correct / total) * 100);
     const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '📚';
 
-    document.getElementById('modal-emoji').textContent = emoji;
-    document.getElementById('modal-score-text').textContent = pct + '%';
-    document.getElementById('modal-correct').textContent   = correct;
-    document.getElementById('modal-incorrect').textContent = incorrect;
-    document.getElementById('modal-score-pts').textContent = score;
+    document.getElementById('modal-emoji').textContent       = emoji;
+    document.getElementById('modal-score-text').textContent  = pct + '%';
+    document.getElementById('modal-correct').textContent     = correct;
+    document.getElementById('modal-incorrect').textContent   = incorrect;
+    document.getElementById('modal-score-pts').textContent   = score;
 
-    // animate ring
     const circumference = 2 * Math.PI * 52;
     const ring = document.getElementById('score-ring-val');
     ring.setAttribute('stroke-dasharray', circumference);
@@ -292,56 +298,13 @@ const PracticeEngine = (() => {
 
     document.getElementById('score-modal').classList.add('show');
     document.getElementById('quiz-progress-bar').style.width = '100%';
-
-    // Save score to server
-    const saveEl = document.getElementById('modal-save-status');
-    if (!saveEl) return;
-    saveEl.style.display = 'block';
-
-    if (typeof Auth !== 'undefined' && Auth.isLoggedIn) {
-      saveEl.className = 'modal-save-status saving';
-      saveEl.textContent = '⏳ Saving score…';
-      Auth.submitScore({
-        subject:    currentSubject,
-        grade:      currentGrade,
-        difficulty: currentDiff,
-        score, correct, total, pct
-      }).then(d => {
-        if (d && d.error) {
-          saveEl.className = 'modal-save-status unsaved';
-          saveEl.textContent = '⚠️ Could not save score: ' + d.error;
-        } else {
-          saveEl.className = 'modal-save-status saved';
-          saveEl.textContent = '✅ Score saved to leaderboard!';
-        }
-      }).catch(() => {
-        saveEl.className = 'modal-save-status unsaved';
-        saveEl.textContent = '⚠️ Could not reach server to save score.';
-      });
-    } else {
-      saveEl.className = 'modal-save-status unsaved';
-      saveEl.innerHTML = '🔒 <a id="modal-signin-link">Sign in</a> to save your score to the leaderboard.';
-      document.getElementById('modal-signin-link')
-        ?.addEventListener('click', () => {
-          document.getElementById('score-modal').classList.remove('show');
-          if (typeof AuthModal !== 'undefined') AuthModal.open('signin');
-        });
-    }
-  }
-
-  function updateSidebarStats() {
-    const s = loadStats();
-    const el = id => document.getElementById(id);
-    if (el('ss-total'))  el('ss-total').textContent  = s.total;
-    if (el('ss-correct'))el('ss-correct').textContent= s.correct;
-    if (el('ss-streak')) el('ss-streak').textContent = s.streak + ' 🔥';
-    if (el('ss-acc'))    el('ss-acc').textContent    = s.total ? Math.round(s.correct/s.total*100)+'%' : '—';
   }
 
   function applyFilters() {
     buildQueue();
     render();
     updateFilterAvailability();
+    updateHeader();
   }
 
   function countFor(g, s, d) {
@@ -357,75 +320,36 @@ const PracticeEngine = (() => {
       const disabled = count === 0 && !isAll;
       pill.disabled = disabled;
       pill.classList.toggle('pill-disabled', disabled);
-      // insert or update count badge
-      let badge = pill.querySelector('.pill-count');
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'pill-count';
-        pill.appendChild(badge);
-      }
-      badge.textContent = count;
     }
-
     document.querySelectorAll('.grade-pill[data-grade]').forEach(pill => {
       const g = pill.dataset.grade;
       applyState(pill, countFor(g, currentSubject, currentDiff), g === 'all');
     });
-
     document.querySelectorAll('.filter-pill[data-subject]').forEach(pill => {
       const s = pill.dataset.subject;
       applyState(pill, countFor(currentGrade, s, currentDiff), s === 'all');
     });
-
     document.querySelectorAll('.diff-pill[data-diff]').forEach(pill => {
       const d = pill.dataset.diff;
-      const count = countFor(currentGrade, currentSubject, d);
-      applyState(pill, count, d === 'all');
-      // update the inline count after the label text (before the dot)
-      const span = pill.querySelector('span:first-child');
-      if (span) {
-        // remove old inline count node if present
-        const old = pill.querySelector('.pill-count-inline');
-        if (old) old.remove();
-        const ic = document.createElement('span');
-        ic.className = 'pill-count-inline';
-        ic.textContent = count;
-        pill.insertBefore(ic, pill.querySelector('.diff-dot'));
-      }
+      applyState(pill, countFor(currentGrade, currentSubject, d), d === 'all');
     });
-  }
-
-  function updateDiffGuide() {
-    const guide = document.getElementById('diff-guide');
-    if (!guide) return;
-    const emap = {
-      'Elementary':   '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · Grades 3–5 level</div>',
-      'Middle':       '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · Foundational</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · Applied concepts</div>',
-      'High School':  '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts · High school core</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts · AP / A-level</div><div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts · National olympiad</div><div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts · IPhO/IChO/IBO</div>',
-      'all':          '<div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts</div><div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts</div><div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts</div><div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts</div>'
-    };
-    guide.innerHTML = emap[currentGrade] || emap['all'];
   }
 
   function init() {
     if (!document.getElementById('quiz-card')) return;
 
-    // Grade level filters
     document.querySelectorAll('.grade-pill[data-grade]').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('.grade-pill[data-grade]').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         currentGrade = pill.dataset.grade;
-        // Reset difficulty when switching grades to avoid empty results
-        currentDiff = 'all';
+        currentDiff  = 'all';
         document.querySelectorAll('.diff-pill[data-diff]').forEach(p => p.classList.remove('active'));
         document.querySelector('.diff-pill[data-diff="all"]').classList.add('active');
         applyFilters();
-        updateDiffGuide();
       });
     });
 
-    // Subject filters
     document.querySelectorAll('.filter-pill[data-subject]').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('.filter-pill[data-subject]').forEach(p => p.classList.remove('active'));
@@ -435,7 +359,6 @@ const PracticeEngine = (() => {
       });
     });
 
-    // Difficulty filters
     document.querySelectorAll('.diff-pill[data-diff]').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('.diff-pill[data-diff]').forEach(p => p.classList.remove('active'));
@@ -445,10 +368,8 @@ const PracticeEngine = (() => {
       });
     });
 
-    // Next button
     document.getElementById('btn-next').addEventListener('click', nextQuestion);
 
-    // Modal buttons
     document.getElementById('btn-restart').addEventListener('click', () => {
       document.getElementById('score-modal').classList.remove('show');
       buildQueue(); render();
@@ -457,28 +378,39 @@ const PracticeEngine = (() => {
       window.location.href = 'index.html';
     });
 
-    // Apply URL params
-    const params = new URLSearchParams(window.location.search);
-    const gParam = params.get('grade');
-    const sParam = params.get('subject');
-    const dParam = params.get('diff');
+    // URL params
+    const params  = new URLSearchParams(window.location.search);
+    const gParam  = params.get('grade');
+    const sParam  = params.get('subject');
+    const dParam  = params.get('diff');
     if (gParam) {
       const gpill = document.querySelector(`.grade-pill[data-grade="${gParam}"]`);
-      if (gpill) { document.querySelector('.grade-pill[data-grade="all"]').classList.remove('active'); gpill.classList.add('active'); currentGrade = gParam; updateDiffGuide(); }
+      if (gpill) {
+        document.querySelector('.grade-pill[data-grade="all"]').classList.remove('active');
+        gpill.classList.add('active');
+        currentGrade = gParam;
+      }
     }
     if (sParam) {
       const spill = document.querySelector(`.filter-pill[data-subject="${sParam}"]`);
-      if (spill) { document.querySelector('.filter-pill[data-subject="all"]').classList.remove('active'); spill.classList.add('active'); currentSubject = sParam; }
+      if (spill) {
+        document.querySelector('.filter-pill[data-subject="all"]').classList.remove('active');
+        spill.classList.add('active');
+        currentSubject = sParam;
+      }
     }
     if (dParam) {
       const dpill = document.querySelector(`.diff-pill[data-diff="${dParam}"]`);
-      if (dpill) { document.querySelector('.diff-pill[data-diff="all"]').classList.remove('active'); dpill.classList.add('active'); currentDiff = dParam; }
+      if (dpill) {
+        document.querySelector('.diff-pill[data-diff="all"]').classList.remove('active');
+        dpill.classList.add('active');
+        currentDiff = dParam;
+      }
     }
 
     buildQueue();
     render();
-    updateSidebarStats();
-    updateDiffGuide();
+    updateHeader();
     updateFilterAvailability();
   }
 

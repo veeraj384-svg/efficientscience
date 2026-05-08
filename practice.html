@@ -3,13 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Practice Arena — EfficientScience</title>
+  <title>Practice — EfficientScience</title>
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-    body { background: var(--bg); }
-    /* Inline SVG gradient for score ring */
-    .score-ring svg { overflow: visible; }
-  </style>
 </head>
 <body>
 
@@ -23,170 +18,114 @@
       <span>EfficientScience</span>
     </a>
     <ul class="nav-links">
-      <li><a href="index.html#subjects">Subjects</a></li>
+      <li><a href="index.html">Home</a></li>
       <li><a href="practice.html" class="active">Practice</a></li>
-      <li><a href="index.html#leaderboard">Rankings</a></li>
+      <li><a href="topics.html">Topics</a></li>
     </ul>
     <div class="nav-actions">
       <a href="index.html" class="btn btn-ghost btn-sm">← Home</a>
-      <button class="btn btn-ghost btn-sm" id="btn-open-signin" style="display:none">Sign In</button>
     </div>
   </div>
 </nav>
 
-<!-- ── Practice Layout ────────────────────────────────── -->
-<div class="practice-page">
+<!-- ── Centered Practice Layout ─────────────────────── -->
+<div class="practice-centered">
 
-  <!-- Sidebar -->
-  <aside class="practice-sidebar">
+  <!-- Header -->
+  <div class="qc-header">
+    <h1 id="qc-title">Science Practice</h1>
+    <p class="qc-sub" id="qc-sub">All Subjects · All Levels</p>
+  </div>
 
-    <!-- Grade Level Selector — big, prominent -->
-    <div class="sidebar-section">
-      <div class="sidebar-label">Grade Level</div>
-      <div class="grade-pills">
-        <button class="grade-pill active" data-grade="all">
-          <span class="gp-icon">🌐</span>
-          <span class="gp-label">All Levels</span>
-        </button>
-        <button class="grade-pill grade-elem" data-grade="Elementary">
-          <span class="gp-icon">🌱</span>
-          <span class="gp-label">Elementary <small>Grades 3–5</small></span>
-        </button>
-        <button class="grade-pill grade-mid" data-grade="Middle">
-          <span class="gp-icon">🔬</span>
-          <span class="gp-label">Middle School <small>Grades 6–8</small></span>
-        </button>
-        <button class="grade-pill grade-hs" data-grade="High School">
-          <span class="gp-icon">🏆</span>
-          <span class="gp-label">High School <small>Competition</small></span>
-        </button>
-      </div>
+  <!-- Stats Bar -->
+  <div class="qc-stats">
+    <div class="qc-stat">
+      <span class="qcs-label">Score</span>
+      <span class="qcs-val grad-text" id="stat-score">0</span>
+    </div>
+    <div class="qc-stat-divider"></div>
+    <div class="qc-stat">
+      <span class="qcs-label">Question</span>
+      <span class="qcs-val"><span id="stat-qnum">—</span> <span style="font-size:14px;opacity:.5">of</span> <span id="stat-qtotal">—</span></span>
+    </div>
+    <div class="qc-stat-divider"></div>
+    <div class="qc-stat">
+      <span class="qcs-label">Time Left</span>
+      <span class="qcs-val" id="timer-display">1:30</span>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="quiz-progress-bar-wrap">
+    <div class="quiz-progress-bar" id="quiz-progress-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="qc-filters">
+    <div class="qcf-row">
+      <span class="qcf-label">Grade</span>
+      <button class="qcf-pill grade-pill active" data-grade="all">All</button>
+      <button class="qcf-pill grade-pill" data-grade="Elementary">🌱 Elementary</button>
+      <button class="qcf-pill grade-pill" data-grade="Middle">🔬 Middle</button>
+      <button class="qcf-pill grade-pill" data-grade="High School">🏆 High School</button>
+    </div>
+    <div class="qcf-row">
+      <span class="qcf-label">Subject</span>
+      <button class="qcf-pill filter-pill active" data-subject="all">All</button>
+      <button class="qcf-pill filter-pill" data-subject="Physics">⚛️ Physics</button>
+      <button class="qcf-pill filter-pill" data-subject="Chemistry">🧪 Chemistry</button>
+      <button class="qcf-pill filter-pill" data-subject="Biology">🧬 Biology</button>
+      <button class="qcf-pill filter-pill" data-subject="Astronomy">🔭 Astronomy</button>
+      <button class="qcf-pill filter-pill" data-subject="Earth Science">🌍 Earth Sci</button>
+      <button class="qcf-pill filter-pill" data-subject="Environmental">🌿 Env</button>
+    </div>
+    <div class="qcf-row">
+      <span class="qcf-label">Level</span>
+      <button class="qcf-pill diff-pill active" data-diff="all">All</button>
+      <button class="qcf-pill diff-pill" data-diff="Easy">Easy</button>
+      <button class="qcf-pill diff-pill" data-diff="Medium">Medium</button>
+      <button class="qcf-pill diff-pill" data-diff="Hard">Hard</button>
+      <button class="qcf-pill diff-pill" data-diff="Olympiad">Olympiad</button>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="quiz-empty" style="display:none" class="qc-empty">
+    <div style="font-size:48px;margin-bottom:16px">🔬</div>
+    <h3 style="margin-bottom:8px">No questions match your filters</h3>
+    <p style="color:var(--text-2);margin-bottom:24px">Try selecting different filters above.</p>
+    <button class="btn btn-primary"
+      onclick="document.querySelectorAll('.filter-pill')[0].click();document.querySelectorAll('.grade-pill')[0].click();document.querySelectorAll('.diff-pill')[0].click()">
+      Reset All Filters
+    </button>
+  </div>
+
+  <!-- Question Card -->
+  <div id="quiz-card" class="quiz-card" style="display:none">
+    <div class="quiz-meta">
+      <span id="quiz-subject-tag" class="tag">Physics</span>
+      <span id="quiz-diff-tag" class="tag">Easy</span>
+      <span id="quiz-num" class="quiz-num">#1 · Topic</span>
     </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Subject</div>
-      <div class="filter-pills">
-        <button class="filter-pill active" data-subject="all">All</button>
-        <button class="filter-pill" data-subject="Physics">Physics</button>
-        <button class="filter-pill" data-subject="Chemistry">Chemistry</button>
-        <button class="filter-pill" data-subject="Biology">Biology</button>
-        <button class="filter-pill" data-subject="Astronomy">Astronomy</button>
-        <button class="filter-pill" data-subject="Earth Science">Earth Sci.</button>
-        <button class="filter-pill" data-subject="Environmental">Environment</button>
-      </div>
+    <div id="quiz-question" class="quiz-question">Loading…</div>
+
+    <div id="quiz-options" class="quiz-options"></div>
+
+    <div id="quiz-explanation" class="explanation-box">
+      <div class="exp-label">💡 Explanation</div>
+      <p></p>
     </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Difficulty</div>
-      <div class="diff-pills">
-        <button class="diff-pill active" data-diff="all">
-          <span>All Levels</span>
-          <span class="diff-dot" style="background:#94a3b8"></span>
-        </button>
-        <button class="diff-pill" data-diff="Easy">
-          <span>Easy</span>
-          <span class="diff-dot" style="background:#22c55e"></span>
-        </button>
-        <button class="diff-pill" data-diff="Medium">
-          <span>Medium</span>
-          <span class="diff-dot" style="background:#f59e0b"></span>
-        </button>
-        <button class="diff-pill" data-diff="Hard">
-          <span>Hard</span>
-          <span class="diff-dot" style="background:#f43f5e"></span>
-        </button>
-        <button class="diff-pill" data-diff="Olympiad">
-          <span>Olympiad</span>
-          <span class="diff-dot" style="background:#a855f7"></span>
-        </button>
-      </div>
+    <div class="quiz-footer">
+      <span></span>
+      <button id="btn-next" class="btn btn-primary" style="display:none">Next Question →</button>
     </div>
+  </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Your Stats</div>
-      <div class="sidebar-stats">
-        <div class="sidebar-stat">
-          <span class="ss-label">Total Answered</span>
-          <span class="ss-val" id="ss-total">—</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="ss-label">Correct</span>
-          <span class="ss-val" id="ss-correct" style="color:var(--green)">—</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="ss-label">Accuracy</span>
-          <span class="ss-val" id="ss-acc">—</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="ss-label">Current Streak</span>
-          <span class="ss-val" id="ss-streak">—</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Difficulty Guide</div>
-      <div id="diff-guide" style="font-size:12px;color:var(--text-2);line-height:1.8;">
-        <div>🟢 <strong style="color:var(--green)">Easy</strong> · 10 pts</div>
-        <div>🟡 <strong style="color:var(--amber)">Medium</strong> · 20 pts</div>
-        <div>🔴 <strong style="color:var(--rose)">Hard</strong> · 30 pts</div>
-        <div>🟣 <strong style="color:var(--purple)">Olympiad</strong> · 50 pts</div>
-      </div>
-    </div>
-
-  </aside>
-
-  <!-- Main content -->
-  <main class="practice-main">
-    <div class="practice-header">
-      <div>
-        <h1>Practice Arena</h1>
-        <p>Answer questions, earn points, and track your growth.</p>
-      </div>
-      <div id="timer-display" class="timer-display">⏱ 1:30</div>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="quiz-progress-bar-wrap">
-      <div class="quiz-progress-bar" id="quiz-progress-bar" style="width:0%"></div>
-    </div>
-    <div id="quiz-progress-text" style="font-size:12px;color:var(--text-3);margin-bottom:28px;">Question 1 of 10</div>
-
-    <!-- Empty state -->
-    <div id="quiz-empty" style="display:none;text-align:center;padding:80px 20px;">
-      <div style="font-size:48px;margin-bottom:20px;">🔬</div>
-      <h3 style="margin-bottom:10px;">No questions match your filters</h3>
-      <p style="color:var(--text-2);margin-bottom:24px;">Try selecting a different subject or difficulty level.</p>
-      <button class="btn btn-primary" onclick="document.querySelector('[data-subject=all]').click()">Reset Filters</button>
-    </div>
-
-    <!-- Question Card -->
-    <div id="quiz-card" class="quiz-card" style="display:none;">
-      <div class="quiz-meta">
-        <span id="quiz-subject-tag" class="tag">Physics</span>
-        <span id="quiz-diff-tag" class="tag">Easy</span>
-        <span id="quiz-num" class="quiz-num">#1 · Mechanics</span>
-      </div>
-
-      <div id="quiz-question" class="quiz-question">Loading...</div>
-
-      <div id="quiz-options" class="quiz-options"></div>
-
-      <div id="quiz-explanation" class="explanation-box">
-        <div class="exp-label">💡 Explanation</div>
-        <p id="quiz-exp-text"></p>
-      </div>
-
-      <div class="quiz-footer">
-        <span></span>
-        <button id="btn-next" class="btn btn-primary" style="display:none">Next Question →</button>
-      </div>
-    </div>
-
-  </main>
 </div>
 
-<!-- ── Score Summary Modal ──────────────────────────────── -->
+<!-- ── Score Summary Modal ──────────────────────────── -->
 <div id="score-modal" class="modal-overlay">
   <div class="modal-box">
     <span class="modal-emoji" id="modal-emoji">🏆</span>
@@ -223,8 +162,6 @@
       </div>
     </div>
 
-    <div id="modal-save-status" class="modal-save-status" style="display:none"></div>
-
     <div class="modal-buttons">
       <button class="btn btn-primary" id="btn-restart">Try Again 🔄</button>
       <button class="btn btn-ghost" id="btn-home">Home</button>
@@ -233,7 +170,6 @@
 </div>
 
 <script src="js/problems.js"></script>
-<script src="js/auth.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
